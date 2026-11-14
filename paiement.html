@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paiement de l'inscription</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="logo">Inscri<span>Gab</span></div>
+
+<h1>Étape 3 - Paiement de l'inscription</h1>
+<p>Plus qu'une étape, et le dossier de ton enfant sera complet.</p>
+
+<!-- RECAP DE CE QU'IL PAIE - rempli par le JS avec les vraies données de l'ÉTAPE 1 -->
+<fieldset>
+<legend>Récapitulatif de ton inscription</legend>
+<p id="recap-parent">Parent : Chargement...</p>
+<p id="recap-enfants">Enfants : Chargement...</p>
+<p id="recap-ecole">École : -</p>
+<p id="recap-annee">Année scolaire : -</p>
+<p id="recap-documents">Documents : -</p>
+<br>
+<p id="recap-frais">Frais d'inscription : -</p>
+<p id="recap-dossier">Frais de dossier : -</p>
+<p><b id="recap-total">Total à payer : -</b></p>
+</fieldset>
+<br>
+
+<form id="form-paiement">
+
+<fieldset>
+<legend>Choisis ton moyen de paiement</legend>
+<label><input type="radio" name="moyen_paiement" value="airtel_money" checked> Airtel Money</label><br><br>
+<label><input type="radio" name="moyen_paiement" value="moov_money"> Moov Money</label><br><br>
+<label><input type="radio" name="moyen_paiement" value="orange_money"> Orange Money</label><br><br>
+<label><input type="radio" name="moyen_paiement" value="carte"> Carte Bancaire</label><br><br>
+<label><input type="radio" name="moyen_paiement" value="especes"> Payer en espèces à l'école</label><br><br>
+</fieldset>
+<br>
+
+<fieldset>
+<legend>Infos pour le paiement</legend>
+<label>Numéro de téléphone qui va payer</label><br>
+<input type="tel" name="telephone_paiement" placeholder="Ex : 074 00 00 00"><br><br>
+<label>Nom sur le compte Mobile Money</label><br>
+<input type="text" name="nom_compte" placeholder="Ex : Mme Mba"><br><br>
+<label>Code de transaction - Si tu as déjà payé</label><br>
+<input type="text" name="code_transaction" placeholder="Ex : TX123456 - Laisse vide si pas encore payé"><br><br>
+</fieldset>
+<br>
+
+<fieldset>
+<legend>Confirmation</legend>
+<label><input type="checkbox" id="accepte" name="accepte" required> J'ai vérifié le montant et je confirme le paiement.</label><br><br>
+</fieldset>
+<br>
+
+<p id="message-paiement" style="color:green"></p>
+
+<button type="button" id="btn-retour-paiement">← Retour aux documents</button>
+<br><br>
+<button type="submit" id="btn-payer">Payer</button>
+
+</form>
+<script src="app.js"></script>
+</body>
+</html>

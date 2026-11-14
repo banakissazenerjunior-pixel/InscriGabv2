@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - Directeur | InscriGab</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="page-dashboard">
+
+<div class="dashboard-layout" id="dashboard-ecole">
+
+  <!-- MENU A GAUCHE -->
+  <aside class="sidebar">
+    <div class="logo">Inscri<span>Gab</span></div>
+    <div class="ecole-nom"><span id="nom-ecole-menu">Chargement...</span><br><small>Directeur</small></div>
+
+    <ul>
+      <li class="active"><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="eleves.html">Élèves</a></li>
+      <li><a href="dossiers.html">Dossiers</a></li>
+      <li><a href="paiements.html">Paiements</a></li>
+      <li><a href="classes.html">Classes</a></li>
+      <li><a href="parametres.html">Paramètres</a></li>
+    </ul>
+
+    <p style="margin-top:30px;"><small id="nom-directeur-menu">Directeur</small></p>
+    <button type="button" id="btn-deconnexion">Se déconnecter</button>
+  </aside>
+
+  <!-- CONTENU A DROITE -->
+  <main class="contenu">
+    <h1 id="bonjour-directeur">Bonjour</h1>
+    <p id="info-ecole">Chargement...</p>
+
+    <!-- BOUTON SESSION - C'EST LE COEUR -->
+    <div style="background:#FFF8E6;border:1px solid #FFD166;padding:16px;border-radius:10px;margin-bottom:20px;">
+      <b>Session d'inscription</b>
+      <p id="statut-session">Session : Chargement...</p>
+      <button type="button" id="btn-session">Ouvrir la session d'inscription</button>
+      <p><small>Tant que la session est FERMÉE, les parents voient "Inscriptions fermées" et ne peuvent pas s'inscrire. Quand tu l'OUVRES, les parents peuvent s'inscrire sur TON école.</small></p>
+    </div>
+
+    <!-- 3 CASES DU HAUT - DYNAMIQUES -->
+    <div class="kpi-grid">
+      <div class="kpi kpi-bleu">
+        <small>ÉLÈVES INSCRITS - MON ÉCOLE</small>
+        <b id="total-inscrits">0</b>
+        <small style="color:#0066FF;" id="inscrits-aujourdhui">+ 0 aujourd'hui</small>
+      </div>
+      <div class="kpi kpi-orange">
+        <small>DOSSIERS EN ATTENTE</small>
+        <b id="dossiers-attente">0</b>
+        <small style="color:#FF9F0A;">À vérifier !</small>
+      </div>
+      <div class="kpi kpi-vert">
+        <small>ENCAISSÉ AUJOURD'HUI</small>
+        <b id="recettes">0 FCFA</b>
+        <small style="color:#00A651;" id="nb-paiements">+ 0 paiements</small>
+      </div>
+    </div>
+
+    <!-- TABLEAU - DYNAMIQUE -->
+    <h2>10 Derniers Inscrits - <span id="nom-ecole-tableau">Mon école</span></h2>
+    <p id="message-vide">Aucune inscription pour l'instant. Ouvre la session pour que les parents s'inscrivent.</p>
+    <table id="table-inscriptions">
+      <thead>
+        <tr><th>NOM</th><th>PRÉNOM</th><th>CLASSE</th><th>STATUT</th><th></th></tr>
+      </thead>
+      <tbody id="corps-tableau"></tbody>
+    </table>
+
+    <p style="margin-top:16px;"><a href="eleves.html">Voir tous les élèves →</a></p>
+
+    <details class="card zone-test">
+      <summary>🧪 Zone de test</summary>
+      <p>Cette zone sert uniquement pendant les essais. Elle supprime toutes les inscriptions de ton école (élèves, documents, paiements). Tes réglages et tes classes sont conservés. Action définitive.</p>
+      <button type="button" id="btn-effacer-tests" class="btn-danger">Supprimer les inscriptions de test</button>
+    </details>
+  </main>
+
+</div>
+<script src="app.js"></script>
+</body>
+</html>

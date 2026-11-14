@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Espace Directeur</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  
+<a href="index.html" class="logo">Inscri<span>Gab</span></a>
+
+<h1>Espace Directeur</h1>
+<p>Bienvenue. Connecte-toi pour gérer ton école.</p>
+<p id="message-directeur"></p>
+
+<!-- CHOIX 1 : J'AI DEJA UN COMPTE -->
+<fieldset>
+<legend>1. J'ai déjà un compte - Connexion</legend>
+<form id="form-connexion">
+<label>Email</label><br>
+<input type="email" name="email_connexion" placeholder="Ex : directeur@ecole.ga" required><br><br>
+<label>Mot de passe</label><br>
+<input type="password" name="mot_de_passe_connexion" placeholder="Ton mot de passe" required><br><br>
+<button type="submit">Se connecter et aller au Dashboard</button><br><br>
+<small>Mot de passe oublié ? Contacte le Super Admin InscriGab.</small>
+</form>
+</fieldset>
+
+<br>
+<p>OU</p>
+<br>
+
+<!-- CHOIX 2 : JE SUIS NOUVEAU -->
+<fieldset>
+<legend>2. Je suis nouveau - Créer mon compte</legend>
+<form id="form-inscription-ecole">
+
+<label>Ton nom complet</label><br>
+<input type="text" name="nom_directeur" placeholder="Ex : M. Obiang" required><br><br>
+
+<label>Nom de ton école</label><br>
+<input type="text" name="nom_ecole" placeholder="Ex : Ecole Privée Les Merveilles" required><br><br>
+
+<label>Quartier / Ville de l'école</label><br>
+<input type="text" name="ville_ecole" placeholder="Ex : Nzeng-Ayong, Libreville" required><br><br>
+
+<label>Quel genre d'école c'est ?</label><br>
+<select name="type_ecole">
+<option>École Privée</option>
+<option>École Publique</option>
+<option>École Confessionnelle / Catholique</option>
+<option>École Confessionnelle / Protestante</option>
+<option>École Islamique</option>
+<option>École Internationale</option>
+<option>École Bilingue</option>
+<option>Autre</option>
+</select><br><br>
+
+<label>N° d'Autorisation d'Ouverture</label><br>
+<input type="text" name="numero_autorisation" placeholder="Ex : Décret N° 00508/PR/MENIC du 03/06/2008"><br>
+<small>Numéro du décret ou de l'arrêté qui autorise ton école à ouvrir. Tu le trouves sur ton papier officiel du Ministère de l'Éducation Nationale.</small><br><br>
+
+<label>Ton école, elle en est où ?</label><br>
+<select name="statut_autorisation">
+<option>J'ai mon autorisation - École reconnue</option>
+<option>École en création - Pas encore d'autorisation</option>
+</select><br>
+<small>Si tu es en création, laisse le N° vide. Ton dossier passera en vérification manuelle par le Super Admin.</small><br><br>
+
+<label>Quels niveaux ton école a ? Coche tout ce que tu as</label><br>
+<input type="checkbox" name="niveau" value="maternelle"> Maternelle<br>
+<input type="checkbox" name="niveau" value="primaire"> Primaire<br>
+<input type="checkbox" name="niveau" value="college"> Collège<br>
+<input type="checkbox" name="niveau" value="lycee"> Lycée<br>
+<input type="checkbox" name="niveau" value="universite"> Université / Supérieur<br><br>
+
+<label>Nombre maximum d'élèves par classe</label><br>
+<input type="number" name="nombre_max_eleves" placeholder="Ex : 30" min="5" max="100"><br><br>
+
+<details>
+<summary><b>Si vôtre école est PRIVÉE, clique ici pour mettre les frais</b></summary>
+<br>
+
+<fieldset>
+<legend>Frais pour les écoles privées uniquement</legend>
+
+<label>Frais d'inscription - Le parent paie une seule fois au début</label><br>
+<input type="number" name="frais_inscription" placeholder="Ex : 25000"><br>
+<small>En FCFA</small><br><br>
+
+<label>Frais de dossier - Si tu en as</label><br>
+<input type="number" name="frais_dossier" placeholder="Ex : 5000"><br>
+<small>En FCFA - Mets 0 si tu n'en as pas</small><br><br>
+
+<label>Montant à payer chaque fin de mois - Scolarité mensuelle</label><br>
+<input type="number" name="montant_mensuel" placeholder="Ex : 35000"><br>
+<small>En FCFA - C'est ce que le parent paiera chaque mois</small><br><br>
+
+<label>Le parent doit payer avant quel jour du mois ?</label><br>
+<select name="date_limite_paiement">
+<option>Avant le 5 du mois</option>
+<option>Avant le 10 du mois</option>
+<option>Avant le 15 du mois</option>
+<option>Avant la fin du mois</option>
+</select><br><br>
+
+<label>Quels documents tu demandes aux parents ?</label><br>
+<input type="checkbox" name="doc_demande" value="acte_naissance" checked> Acte de naissance<br>
+<input type="checkbox" name="doc_demande" value="photo" checked> Photo d'identité<br>
+<input type="checkbox" name="doc_demande" value="carnet_sante" checked> Carnet de santé<br>
+<input type="checkbox" name="doc_demande" value="bulletin"> Bulletin de l'année précédente<br>
+<input type="checkbox" name="doc_demande" value="piece_parent"> Pièce d'identité du parent<br><br>
+
+</fieldset>
+</details>
+<br><br>
+
+<label>Téléphone WhatsApp</label><br>
+<input type="tel" name="telephone_directeur" placeholder="Ex : 074 00 00 00"><br><br>
+
+<label>Email - ça sera ton identifiant</label><br>
+<input type="email" name="email_inscription" placeholder="Ex : directeur@ecole.ga" required><br><br>
+
+<label>Crée un mot de passe</label><br>
+<input type="password" name="mot_de_passe_inscription" placeholder="Choisis un mot de passe" required><br><br>
+
+<label>Confirme ton mot de passe</label><br>
+<input type="password" name="confirmer_mot_de_passe" placeholder="Retape le même mot de passe" required><br><br>
+
+<button type="submit">Créer mon compte et aller au Dashboard</button>
+
+</form>
+</fieldset>
+
+<br>
+<p>Tu es parent ? <a href="parent.html">Aller au formulaire parent</a></p>
+
+<script src="app.js"></script>
+</body>
+</html>

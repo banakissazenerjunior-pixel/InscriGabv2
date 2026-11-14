@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiche École - Super Admin | InscriGab</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="page-dashboard">
+<div class="dashboard-layout">
+  <aside class="sidebar">
+  <a href="index.html" class="logo">Inscri<span>Gab</span></a>
+    <div class="ecole-nom">InscriGab<br><small>Super Admin</small></div>
+    <ul>
+      <li><a href="dashboardSuperadmin.html">Dashboard</a></li>
+      <li class="active"><a href="ecoles.html">Écoles</a></li>
+      <li><a href="utilisateurs.html">Utilisateurs</a></li>
+      <li><a href="abonnements.html">Abonnements</a></li>
+      <li><a href="sauvegardes.html">Sauvegardes</a></li>
+      <li><a href="demandes-restauration.html">Demandes Restauration</a></li>
+    </ul>
+    <p style="margin-top:30px;"><small>Super Admin</small></p>
+  </aside>
+  <main class="contenu" id="page-sa-fiche-ecole">
+    <h1>École Les Palmiers</h1>
+    <p>Demande reçue le 12 Nov 2026 - Libreville</p>
+    <div class="kpi-grid">
+      <div class="kpi kpi-bleu"><small>VILLE</small><b>Libreville</b></div>
+      <div class="kpi kpi-bleu"><small>DIRECTEUR</small><b>M. ONDO</b></div>
+      <div class="kpi kpi-orange"><small>STATUT ACTUEL</small><b>Cas spécial</b><small style="color:#FF9F0A;">À vérifier par toi</small></div>
+    </div>
+    <h2>Détails de l'école</h2>
+    <table>
+      <tr><th>CHAMP</th><th>VALEUR</th></tr>
+      <tr><td><b>Nom école</b></td><td>École Primaire Les Palmiers</td></tr>
+      <tr><td><b>Type</b></td><td>École Privée Reconnue</td></tr>
+      <tr><td><b>Directeur</b></td><td>M. ONDO - ondo@gmail.com - 077 00 00 00</td></tr>
+      <tr><td><b>N° d'Autorisation</b></td><td>Décret N° 99999</td></tr>
+      <tr><td><b>Élèves prévus</b></td><td>350 élèves</td></tr>
+      <tr><td><b>Plan</b></td><td><span class="badge badge-valide">Gratuit</span></td></tr>
+    </table>
+    <br>
+    <div class="card">
+      <h2>⚠️ Pourquoi elle est bloquée ?</h2>
+      <p><b>Raison :</b> N° d'Autorisation introuvable. Vérifie le papier du Directeur.</p>
+      <p>Tu fais quoi ?</p>
+      <button>✅ Valider quand même - Je connais cette école</button><br><br>
+      <button type="reset">❌ Refuser - Autorisation fausse</button>
+    </div>
+    <p><a href="dashboardSuperadmin.html">← Retour au Dashboard</a></p>
+  </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

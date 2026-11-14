@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inscription élève</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="logo">Inscri<span>Gab</span></div>
+
+<h1>Inscrire mon enfant</h1>
+
+<form id="form-inscription">
+
+<fieldset>
+<legend>1. Le parent</legend>
+<label>Nom complet du parent</label><br>
+<input type="text" name="parent_nom" placeholder="Ex : Mme Mba" required><br><br>
+<label>Téléphone WhatsApp</label><br>
+<input type="tel" name="parent_tel" placeholder="Ex : 074 00 00 00" required><br><br>
+</fieldset>
+<br>
+
+<!-- C'est le JS qui met Enfant 1, 2, 3... ici -->
+<div id="liste-enfants"></div>
+
+<button type="button" id="btn-ajouter-enfant">+ Inscrire un autre enfant</button>
+<br><br>
+
+<label>Année scolaire</label><br>
+<select name="annee_scolaire">
+<option>2026-2027</option>
+<option>2025-2026</option>
+</select><br><br>
+
+<button type="submit">Envoyer les inscriptions → Aller aux documents</button><br><br>
+<button type="reset">Effacer</button>
+
+</form>
+
+<script src="app.js"></script>
+</body>
+</html>

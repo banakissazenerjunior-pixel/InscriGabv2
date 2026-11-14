@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiche Élève - ONDO Léa | InscriGab</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="page-dashboard">
+
+<div class="dashboard-layout">
+
+  <!-- MENU -->
+  <aside class="sidebar">
+    <div class="logo">Inscri<span>Gab</span></div>
+    <div class="ecole-nom">Lycée Léon Mba<br><small>Directeur</small></div>
+
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li class="active"><a href="eleves.html">Élèves</a></li>
+      <li><a href="dossiers.html">Dossiers</a></li>
+      <li><a href="paiements.html">Paiements</a></li>
+      <li><a href="classes.html">Classes</a></li>
+      <li><a href="parametres.html">Paramètres</a></li>
+    </ul>
+
+    <p style="margin-top:30px;"><small>M. ONDO - Directeur</small></p>
+  </aside>
+
+  <!-- CONTENU -->
+  <main class="contenu" id="page-fiche-eleve">
+    <p><a href="eleves.html">← Retour aux élèves</a></p>
+
+    <h1>ONDO Léa</h1>
+    <p>6ème A - Lycée Léon Mba - <span class="badge badge-valide">Validé</span></p>
+
+    <!-- 1. INFOS ELEVE -->
+    <div class="card">
+      <h2 style="text-align:left;">Infos Élève</h2>
+      <p style="text-align:left;"><b>Nom :</b> ONDO<br>
+      <b>Prénom :</b> Léa<br>
+      <b>Date de naissance :</b> 12 Mars 2015<br>
+      <b>Classe demandée :</b> 6ème A<br>
+      <b>Genre :</b> Fille<br>
+      <b>Lieu de naissance :</b> Libreville</p>
+    </div>
+
+    <!-- 2. PARENT -->
+    <div class="card">
+      <h2 style="text-align:left;">Parent / Tuteur</h2>
+      <p style="text-align:left;"><b>Nom :</b> ONDO Marc<br>
+      <b>Téléphone :</b> 066 12 34 56<br>
+      <b>WhatsApp :</b> 066 12 34 56<br>
+      <b>Quartier :</b> Akanda</p>
+      <button style="margin-top:10px;">Appeler le parent</button>
+    </div>
+
+    <!-- 3. DOCUMENTS -->
+    <div class="card">
+      <h2 style="text-align:left;">Documents</h2>
+      <table>
+        <tr><th>DOCUMENT</th><th>STATUT</th><th></th></tr>
+        <tr>
+          <td>Acte de naissance</td>
+          <td><span class="badge badge-valide">Reçu</span></td>
+          <td><a href="#">Voir</a></td>
+        </tr>
+        <tr>
+          <td>Photo d'identité</td>
+          <td><span class="badge badge-valide">Reçu</span></td>
+          <td><a href="#">Voir</a></td>
+        </tr>
+        <tr>
+          <td>Bulletin précédent</td>
+          <td><span class="badge badge-attente">Manquant</span></td>
+          <td><a href="#">Demander</a></td>
+        </tr>
+        <tr>
+          <td>Carnet de vaccination</td>
+          <td><span class="badge badge-valide">Reçu</span></td>
+          <td><a href="#">Voir</a></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- 4. PAIEMENT -->
+    <div class="card">
+      <h2 style="text-align:left;">Paiement</h2>
+      <p style="text-align:left;"><b>Montant total :</b> 85 000 FCFA<br>
+      <b>Payé :</b> 85 000 FCFA<br>
+      <b>Reste :</b> 0 FCFA</p>
+      <p style="text-align:left;"><span class="badge badge-valide">Payé complet</span></p>
+    </div>
+
+    <!-- 5. ACTIONS DIRECTEUR -->
+    <div class="card">
+      <h2 style="text-align:left;">Décision du Directeur</h2>
+      <button class="vert">✅ Valider l'inscription</button>
+      <button style="background:#FF9F0A; margin-top:10px;">⚠️ Mettre en Cas spécial</button>
+      <button type="reset">Refuser le dossier</button>
+    </div>
+
+  </main>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

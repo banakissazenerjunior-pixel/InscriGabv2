@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demandes Restauration - Super Admin | InscriGab</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="page-dashboard">
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <a href="index.html" class="logo">Inscri<span>Gab</span></a>
+    <div class="ecole-nom">InscriGab<br><small>Super Admin</small></div>
+    <ul>
+      <li><a href="dashboardSuperadmin.html">Dashboard</a></li>
+      <li><a href="ecoles.html">Écoles</a></li>
+      <li><a href="utilisateurs.html">Utilisateurs</a></li>
+      <li><a href="abonnements.html">Abonnements</a></li>
+      <li><a href="sauvegardes.html">Sauvegardes</a></li>
+      <li class="active"><a href="demandes-restauration.html">Demandes Restauration</a></li>
+    </ul>
+    <p style="margin-top:30px;"><small>Super Admin</small></p>
+  </aside>
+  <main class="contenu" id="page-sa-restaurations">
+    <h1>Demandes de Restauration</h1>
+    <p>Seul toi peux valider une restauration.</p>
+    <h2>En attente</h2>
+    <table>
+      <tr><th>ÉCOLE</th><th>SAUVEGARDE</th><th>MOTIF</th><th>STATUT</th><th></th></tr>
+      <tr><td><b>LES PALMIERS</b></td><td>14/10/2024 - 09:32</td><td>Perte de données</td><td><span class="badge badge-attente">En attente</span></td><td><a href="#detail">Voir</a></td></tr>
+      <tr><td><b>STE MARIE</b></td><td>13/10/2024 - 16:10</td><td>Erreur mise à jour</td><td><span class="badge badge-attente">En attente</span></td><td><a href="#detail">Voir</a></td></tr>
+    </table>
+    <br>
+    <div class="card" id="detail">
+      <h2>Demande - Les Palmiers</h2>
+      <p><b>Sauvegarde :</b> 14/10/2024 - 09:32<br>
+      <b>Motif :</b> Perte de données après suppression accidentelle<br>
+      <b>Directeur :</b> M. ONDO</p>
+      <button>✅ Valider la restauration</button><br><br>
+      <button type="reset">❌ Refuser la restauration</button>
+    </div>
+    <p><a href="dashboardSuperadmin.html">← Retour au Dashboard</a></p>
+  </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

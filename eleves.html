@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Élèves | InscriGab</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="page-dashboard">
+
+<div class="dashboard-layout">
+
+  <!-- MENU A GAUCHE - pareil que dashboard -->
+  <aside class="sidebar">
+    <div class="logo">Inscri<span>Gab</span></div>
+    <div class="ecole-nom">Lycée Léon Mba<br><small>Directeur</small></div>
+
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li class="active"><a href="eleves.html">Élèves</a></li>
+      <li><a href="dossiers.html">Dossiers</a></li>
+      <li><a href="paiements.html">Paiements</a></li>
+      <li><a href="classes.html">Classes</a></li>
+      <li><a href="parametres.html">Paramètres</a></li>
+    </ul>
+
+    <p style="margin-top:30px;"><small>M. ONDO - Directeur</small></p>
+  </aside>
+
+  <!-- CONTENU -->
+  <main class="contenu" id="page-eleves">
+    <h1>Élèves - Lycée Léon Mba</h1>
+    <p>1 248 élèves inscrits</p>
+
+    <!-- RECHERCHE + FILTRE -->
+    <div class="card" style="padding:16px;">
+      <label>🔍 Rechercher un élève</label>
+      <input type="text" placeholder="Ex : ONDO, Léa, 6ème A...">
+
+      <label>Filtrer par classe</label>
+      <select>
+        <option>Toutes les classes</option>
+        <option>6ème A</option>
+        <option>6ème B</option>
+        <option>5ème A</option>
+        <option>5ème B</option>
+        <option>4ème A</option>
+        <option>Terminale C</option>
+      </select>
+
+      <label>Filtrer par statut</label>
+      <select>
+        <option>Tous les statuts</option>
+        <option>Validé</option>
+        <option>En attente</option>
+        <option>Cas spécial</option>
+      </select>
+    </div>
+
+    <!-- TABLEAU ÉLÈVES -->
+    <table>
+      <tr>
+        <th>NOM</th>
+        <th>PRÉNOM</th>
+        <th>CLASSE</th>
+        <th>STATUT</th>
+        <th></th>
+      </tr>
+      <tr>
+        <td><b>ONDO</b></td>
+        <td>Léa</td>
+        <td>6ème A</td>
+        <td><span class="badge badge-valide">Validé</span></td>
+        <td><a href="fiche-eleve.html">Voir →</a></td>
+      </tr>
+      <tr>
+        <td><b>MBOUMBA</b></td>
+        <td>Kevin</td>
+        <td>5ème B</td>
+        <td><span class="badge badge-attente">En attente</span></td>
+        <td><a href="fiche-eleve.html">Voir →</a></td>
+      </tr>
+      <tr>
+        <td><b>NZUE</b></td>
+        <td>Aïna</td>
+        <td>6ème A</td>
+        <td><span class="badge badge-valide">Validé</span></td>
+        <td><a href="fiche-eleve.html">Voir →</a></td>
+      </tr>
+      <tr>
+        <td><b>OBAME</b></td>
+        <td>Darel</td>
+        <td>Terminale C</td>
+        <td><span class="badge badge-special">Cas spécial</span></td>
+        <td><a href="fiche-eleve.html">Voir →</a></td>
+      </tr>
+      <tr>
+        <td><b>MENGUE</b></td>
+        <td>Sarah</td>
+        <td>4ème A</td>
+        <td><span class="badge badge-valide">Validé</span></td>
+        <td><a href="fiche-eleve.html">Voir →</a></td>
+      </tr>
+      <tr>
+        <td><b>BOUKA</b></td>
+        <td>Yanis</td>
+        <td>5ème B</td>
+        <td><span class="badge badge-attente">En attente</span></td>
+        <td><a href="fiche-eleve.html">Voir →</a></td>
+      </tr>
+      <tr>
+        <td><b>ESSONO</b></td>
+        <td>Maëlle</td>
+        <td>6ème B</td>
+        <td><span class="badge badge-valide">Validé</span></td>
+        <td><a href="fiche-eleve.html">Voir →</a></td>
+      </tr>
+      <tr>
+        <td><b>NGOMA</b></td>
+        <td>Chris</td>
+        <td>4ème A</td>
+        <td><span class="badge badge-valide">Validé</span></td>
+        <td><a href="fiche-eleve.html">Voir →</a></td>
+      </tr>
+    </table>
+
+  </main>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

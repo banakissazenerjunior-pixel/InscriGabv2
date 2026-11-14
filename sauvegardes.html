@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sauvegardes - Super Admin | InscriGab</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="page-dashboard">
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <a href="index.html" class="logo">Inscri<span>Gab</span></a>
+    <div class="ecole-nom">InscriGab<br><small>Super Admin</small></div>
+    <ul>
+      <li><a href="dashboardSuperadmin.html">Dashboard</a></li>
+      <li><a href="ecoles.html">Écoles</a></li>
+      <li><a href="utilisateurs.html">Utilisateurs</a></li>
+      <li><a href="abonnements.html">Abonnements</a></li>
+      <li class="active"><a href="sauvegardes.html">Sauvegardes</a></li>
+      <li><a href="demandes-restauration.html">Demandes Restauration</a></li>
+    </ul>
+    <p style="margin-top:30px;"><small>Super Admin</small></p>
+  </aside>
+  <main class="contenu" id="page-sa-sauvegardes">
+    <h1>Sauvegardes - Toutes les écoles</h1>
+    <p>Tu peux voir toutes les sauvegardes. Pour restaurer, il faut une demande du Directeur.</p>
+    <table>
+      <tr><th>ÉCOLE</th><th>DERNIÈRE SAUVEGARDE</th><th>TAILLE</th><th>STATUT</th><th></th></tr>
+      <tr><td><b>LYCÉE MODERNE</b></td><td>14/10/2024 - 09:32</td><td>2.4 Mo</td><td><span class="badge badge-valide">OK</span></td><td><a href="demandes-restauration.html">Voir demandes</a></td></tr>
+      <tr><td><b>LES PALMIERS</b></td><td>14/10/2024 - 09:32</td><td>1.8 Mo</td><td><span class="badge badge-attente">Demande en attente</span></td><td><a href="demandes-restauration.html">Voir demandes</a></td></tr>
+      <tr><td><b>LYCÉE LÉON MBA</b></td><td>13/10/2024 - 16:10</td><td>3.1 Mo</td><td><span class="badge badge-valide">OK</span></td><td><a href="demandes-restauration.html">Voir demandes</a></td></tr>
+    </table>
+    <p><a href="dashboardSuperadmin.html">← Retour au Dashboard</a></p>
+  </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

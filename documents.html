@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Envoyer les documents</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="logo">Inscri<span>Gab</span></div>
+
+<h2>Étape 2 - Documents administratifs</h2>
+<p id="info-enfant">Chargement...</p>
+<p>Merci, vos enfants sont bien inscrits.</p>
+<p>Maintenant, envoyez les documents demandés par : <b id="nom-ecole-docs">…</b></p>
+<p>Tous les documents doivent être en photo ou en PDF, bien lisibles.</p>
+
+<form id="form-documents">
+
+  <!-- C'est le JS qui va créer les blocs Enfant 1, 2, 3... ici, automatiquement -->
+  <div id="liste-documents"></div>
+
+  <br>
+  <fieldset>
+    <legend>Confirmation</legend>
+    <label><input type="checkbox" id="certifie" name="certifie" required> Je certifie que tous les documents envoyés sont vrais et lisibles.</label>
+  </fieldset>
+
+  <br>
+  <p id="message-docs" style="color:green"></p>
+
+  <button type="button" id="btn-retour">← Retour au formulaire d'inscription</button>
+  <br><br>
+  <button type="submit">Envoyer tous les documents</button>
+
+</form>
+<script src="app.js"></script>
+</body>
+</html>

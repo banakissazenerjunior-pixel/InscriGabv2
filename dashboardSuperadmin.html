@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - Super Admin | InscriGab</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="page-dashboard">
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <a href="index.html" class="logo">Inscri<span>Gab</span></a>
+    <div class="ecole-nom">InscriGab<br><small>Super Admin</small></div>
+    <ul>
+      <li class="active"><a href="dashboardSuperadmin.html">Dashboard</a></li>
+      <li><a href="ecoles.html">Écoles</a></li>
+      <li><a href="utilisateurs.html">Utilisateurs</a></li>
+      <li><a href="abonnements.html">Abonnements</a></li>
+      <li><a href="sauvegardes.html">Sauvegardes</a></li>
+      <li><a href="demandes-restauration.html">Demandes Restauration</a></li>
+    </ul>
+    <p style="margin-top:30px;"><small>Super Admin</small></p>
+  </aside>
+  <main class="contenu" id="page-sa-dashboard">
+    <h1>Bonjour, Super Admin</h1>
+    <p>Toutes les écoles | Jeudi 12 Nov 2026</p>
+    <div class="kpi-grid">
+      <div class="kpi kpi-bleu"><small>ÉCOLES - TOUTE LA PLATEFORME</small><b>12</b><small style="color:#0066FF;">10 validées auto + 2 à vérifier</small></div>
+      <div class="kpi kpi-orange"><small>CAS SPÉCIAUX À TRAITER</small><b>2</b><small style="color:#FF9F0A;">Autorisation à vérifier</small></div>
+      <div class="kpi kpi-vert"><small>ÉLÈVES INSCRITS</small><b>1 248</b><small style="color:#00A651;">+ 48 ce mois</small></div>
+      <div class="kpi kpi-orange"><small>DEMANDES RESTAURATION</small><b>3</b><small style="color:#FF9F0A;">À valider ! Seul toi</small></div>
+    </div>
+    <h2>⚠️ Cas Spéciaux - Autorisation à vérifier</h2>
+    <table>
+      <tr><th>ÉCOLE</th><th>N° AUTORISATION</th><th>PROBLÈME</th><th>STATUT</th><th></th></tr>
+      <tr>
+        <td><b>ÉCOLE LES PALMIERS</b></td><td>Décret N° 99999</td><td>N° introuvable</td>
+        <td><span class="badge badge-special">Cas spécial</span></td>
+        <td><a href="fiche-ecole.html">Vérifier</a></td>
+      </tr>
+      <tr>
+        <td><b>COLLÈGE SAINTE MARIE</b></td><td>- Aucun -</td><td>École en création</td>
+        <td><span class="badge badge-attente">En attente</span></td>
+        <td><a href="fiche-ecole.html">Vérifier</a></td>
+      </tr>
+    </table>
+    <h2>Écoles validées automatiquement</h2>
+    <table>
+      <tr><th>ÉCOLE</th><th>VILLE</th><th>N° AUTORISATION</th><th>STATUT</th><th></th></tr>
+      <tr>
+        <td><b>LYCÉE MODERNE</b></td><td>Akanda</td><td>Décret N° 00508/PR/MENIC</td>
+        <td><span class="badge badge-valide">Auto Validé</span></td>
+        <td><a href="fiche-ecole.html">Voir</a></td>
+      </tr>
+      <tr>
+        <td><b>LYCÉE LÉON MBA</b></td><td>Libreville</td><td>Arrêté N° 0012/MEN</td>
+        <td><span class="badge badge-valide">Auto Validé</span></td>
+        <td><a href="fiche-ecole.html">Voir</a></td>
+      </tr>
+    </table>
+    <p style="margin-top:16px;"><a href="ecoles.html">Voir toutes les écoles →</a></p>
+  </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

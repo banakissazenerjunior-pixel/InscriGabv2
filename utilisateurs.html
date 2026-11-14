@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Utilisateurs - Super Admin | InscriGab</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="page-dashboard">
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <a href="index.html" class="logo">Inscri<span>Gab</span></a>
+    <div class="ecole-nom">InscriGab<br><small>Super Admin</small></div>
+    <ul>
+      <li><a href="dashboardSuperadmin.html">Dashboard</a></li>
+      <li><a href="ecoles.html">Écoles</a></li>
+      <li class="active"><a href="utilisateurs.html">Utilisateurs</a></li>
+      <li><a href="abonnements.html">Abonnements</a></li>
+      <li><a href="sauvegardes.html">Sauvegardes</a></li>
+      <li><a href="demandes-restauration.html">Demandes Restauration</a></li>
+    </ul>
+    <p style="margin-top:30px;"><small>Super Admin</small></p>
+  </aside>
+  <main class="contenu" id="page-sa-utilisateurs">
+    <h1>Utilisateurs</h1>
+    <p>Tous les comptes de la plateforme</p>
+    <table>
+      <tr><th>NOM</th><th>RÔLE</th><th>ÉCOLE</th><th>EMAIL</th><th>STATUT</th><th></th></tr>
+      <tr><td><b>M. ONDO</b></td><td>Directeur</td><td>Les Palmiers</td><td>ondo@gmail.com</td><td><span class="badge badge-valide">Actif</span></td><td><a href="#">Voir</a></td></tr>
+      <tr><td><b>Mme MBENG</b></td><td>Directrice</td><td>Lycée Moderne</td><td>mbeng@gmail.com</td><td><span class="badge badge-valide">Actif</span></td><td><a href="#">Voir</a></td></tr>
+      <tr><td><b>M. KOUMBA</b></td><td>Parent</td><td>Les Palmiers</td><td>koumba@gmail.com</td><td><span class="badge badge-valide">Actif</span></td><td><a href="#">Voir</a></td></tr>
+      <tr><td><b>Mme NZAMBA</b></td><td>Parent</td><td>Lycée Léon Mba</td><td>nzamba@gmail.com</td><td><span class="badge badge-attente">En attente</span></td><td><a href="#">Voir</a></td></tr>
+    </table>
+    <p><a href="dashboardSuperadmin.html">← Retour au Dashboard</a></p>
+  </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

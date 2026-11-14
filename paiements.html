@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paiements | InscriGab</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="page-dashboard">
+
+<div class="dashboard-layout">
+
+  <!-- MENU -->
+  <aside class="sidebar">
+    <a href="index.html" class="logo">Inscri<span>Gab</span></a>
+    <div class="ecole-nom">Lycée Léon Mba<br><small>Directeur</small></div>
+
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="eleves.html">Élèves</a></li>
+      <li><a href="dossiers.html">Dossiers</a></li>
+      <li class="active"><a href="paiements.html">Paiements</a></li>
+      <li><a href="classes.html">Classes</a></li>
+      <li><a href="parametres.html">Paramètres</a></li>
+    </ul>
+
+    <p style="margin-top:30px;"><small>M. ONDO - Directeur</small></p>
+  </aside>
+
+  <!-- CONTENU -->
+  <main class="contenu" id="page-paiements">
+    <h1>Paiements - Lycée Léon Mba</h1>
+    <p>Année scolaire 2026 - 2027</p>
+
+    <!-- 3 PETITES CARTES EN HAUT -->
+    <div class="chiffres">
+      <div class="chiffre">
+        <p>Argent déjà reçu</p>
+        <h2>42 350 000 FCFA</h2>
+      </div>
+      <div class="chiffre">
+        <p>Argent encore à recevoir</p>
+        <h2>12 650 000 FCFA</h2>
+      </div>
+      <div class="chiffre">
+        <p>Élèves qui ont tout payé</p>
+        <h2>987 / 1 248</h2>
+      </div>
+    </div>
+
+    <!-- FILTRES -->
+    <div class="card" style="padding:16px;">
+      <label>Filtrer</label>
+      <select>
+        <option>Tous les paiements</option>
+        <option>Payé complet</option>
+        <option>Payé en partie</option>
+        <option>Rien payé</option>
+      </select>
+      <input type="text" placeholder="🔍 Rechercher un élève...">
+    </div>
+
+    <!-- TABLEAU PAIEMENTS -->
+    <table>
+      <tr>
+        <th>ÉLÈVE</th>
+        <th>CLASSE</th>
+        <th>À PAYER</th>
+        <th>PAYÉ</th>
+        <th>RESTE</th>
+        <th>STATUT</th>
+      </tr>
+      <tr>
+        <td><b>ONDO Léa</b></td>
+        <td>6ème A</td>
+        <td>85 000</td>
+        <td>85 000</td>
+        <td>0</td>
+        <td><span class="badge badge-valide">Payé</span></td>
+      </tr>
+      <tr>
+        <td><b>MBOUMBA Kevin</b></td>
+        <td>5ème B</td>
+        <td>85 000</td>
+        <td>40 000</td>
+        <td>45 000</td>
+        <td><span class="badge badge-attente">En partie</span></td>
+      </tr>
+      <tr>
+        <td><b>BOUKA Yanis</b></td>
+        <td>5ème B</td>
+        <td>85 000</td>
+        <td>0</td>
+        <td>85 000</td>
+        <td><span class="badge badge-special">Rien payé</span></td>
+      </tr>
+      <tr>
+        <td><b>NZUE Aïna</b></td>
+        <td>6ème A</td>
+        <td>85 000</td>
+        <td>85 000</td>
+        <td>0</td>
+        <td><span class="badge badge-valide">Payé</span></td>
+      </tr>
+      <tr>
+        <td><b>OBAME Darel</b></td>
+        <td>Terminale C</td>
+        <td>120 000</td>
+        <td>60 000</td>
+        <td>60 000</td>
+        <td><span class="badge badge-attente">En partie</span></td>
+      </tr>
+      <tr>
+        <td><b>MENGUE Sarah</b></td>
+        <td>4ème A</td>
+        <td>95 000</td>
+        <td>95 000</td>
+        <td>0</td>
+        <td><span class="badge badge-valide">Payé</span></td>
+      </tr>
+    </table>
+
+    <p style="margin-top:16px;"><small>vous voyez en 1 coup d'œil qui doit encore payer.</small></p>
+
+  </main>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

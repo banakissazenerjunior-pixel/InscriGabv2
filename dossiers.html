@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dossiers | InscriGab</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="page-dashboard">
+
+<div class="dashboard-layout">
+
+  <!-- MENU -->
+  <aside class="sidebar">
+    <a href="index.html" class="logo">Inscri<span>Gab</span></a>
+    <div class="ecole-nom">Lycée Léon Mba<br><small>Directeur</small></div>
+
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="eleves.html">Élèves</a></li>
+      <li class="active"><a href="dossiers.html">Dossiers</a></li>
+      <li><a href="paiements.html">Paiements</a></li>
+      <li><a href="classes.html">Classes</a></li>
+      <li><a href="parametres.html">Paramètres</a></li>
+    </ul>
+
+    <p style="margin-top:30px;"><small>M. ONDO - Directeur</small></p>
+  </aside>
+
+  <!-- CONTENU -->
+  <main class="contenu" id="page-dossiers">
+    <h1>Dossiers à traiter</h1>
+    <p>18 dossiers en attente - 12 cas spéciaux</p>
+
+    <!-- FILTRES -->
+    <div class="card" style="padding:16px;">
+      <label>Filtrer par type</label>
+      <select>
+        <option>Tous les dossiers</option>
+        <option>En attente de validation</option>
+        <option>Cas spécial</option>
+        <option>Document manquant</option>
+        <option>Paiement incomplet</option>
+      </select>
+      <input type="text" placeholder="🔍 Rechercher un dossier...">
+    </div>
+
+    <!-- TABLEAU DOSSIERS -->
+    <table>
+      <tr>
+        <th>ÉLÈVE</th>
+        <th>CLASSE</th>
+        <th>PROBLÈME</th>
+        <th>DEPUIS</th>
+        <th></th>
+      </tr>
+      <tr>
+        <td><b>OBAME Darel</b></td>
+        <td>Terminale C</td>
+        <td><span class="badge badge-special">Cas spécial - Âge</span></td>
+        <td>Il y a 2 jours</td>
+        <td><a href="fiche-eleve.html">Traiter →</a></td>
+      </tr>
+      <tr>
+        <td><b>MBOUMBA Kevin</b></td>
+        <td>5ème B</td>
+        <td><span class="badge badge-attente">Document manquant</span></td>
+        <td>Il y a 1 jour</td>
+        <td><a href="fiche-eleve.html">Traiter →</a></td>
+      </tr>
+      <tr>
+        <td><b>BOUKA Yanis</b></td>
+        <td>5ème B</td>
+        <td><span class="badge badge-attente">Paiement incomplet</span></td>
+        <td>Il y a 3 jours</td>
+        <td><a href="fiche-eleve.html">Traiter →</a></td>
+      </tr>
+      <tr>
+        <td><b>NGUEMA Lina</b></td>
+        <td>6ème A</td>
+        <td><span class="badge badge-special">Cas spécial - Doublement</span></td>
+        <td>Il y a 4 jours</td>
+        <td><a href="fiche-eleve.html">Traiter →</a></td>
+      </tr>
+      <tr>
+        <td><b>MOUSSAVOU Dan</b></td>
+        <td>4ème A</td>
+        <td><span class="badge badge-attente">Document manquant</span></td>
+        <td>Il y a 5 jours</td>
+        <td><a href="fiche-eleve.html">Traiter →</a></td>
+      </tr>
+      <tr>
+        <td><b>AKOUE Sara</b></td>
+        <td>Terminale C</td>
+        <td><span class="badge badge-special">Cas spécial - Transfert</span></td>
+        <td>Il y a 6 jours</td>
+        <td><a href="fiche-eleve.html">Traiter →</a></td>
+      </tr>
+    </table>
+
+    <!-- PETITE EXPLICATION -->
+    <div class="card">
+      <h2 style="text-align:left;">C'est quoi un Cas spécial ?</h2>
+      <p style="text-align:left;">
+        - Élève trop âgé pour sa classe<br>
+        - Élève qui redouble 2 fois<br>
+        - Élève qui vient d'une autre école<br>
+        - Document qui ne correspond pas<br><br>
+        <b>Seul le Directeur peut valider un Cas spécial.</b><br>
+        La secrétaire ne peut pas le valider toute seule.
+      </p>
+    </div>
+
+  </main>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

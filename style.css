@@ -1,0 +1,297 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+
+body {
+    font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+    background: #EAF4FF;
+    margin: 0;
+    padding: 16px;
+    color: #1E293B;
+}
+
+/* LOGO */
+.logo {
+    font-size: 34px;
+    font-weight: 800;
+    color: #0066FF;
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 10px;
+    letter-spacing: -1px;
+}
+.logo span { color: #00A651; }
+a.logo {
+    text-decoration: none;
+    display: block;
+    color: #0066FF;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+    background: transparent;
+}
+a.logo:visited,
+a.logo:hover,
+a.logo:active,
+a.logo:focus {
+    color: #0066FF;
+    text-decoration: none;
+    outline: none;
+    background: transparent;
+    -webkit-tap-highlight-color: transparent;
+}
+a.logo:active span,
+a.logo:focus span {
+    color: #00A651;
+}
+.logo-sous {
+    text-align: center;
+    font-size: 13px;
+    color: #64748B;
+    margin-bottom: 20px;
+}
+
+h1 { font-size: 26px; font-weight: 800; color: #0066FF; text-align: center; }
+h2 { font-size: 20px; font-weight: 700; color: #0066FF; text-align: center; }
+p { font-size: 15px; line-height: 1.5; color: #475569; text-align: center; }
+a { color: #0066FF; font-weight: 700; text-decoration: none; }
+small { color: #64748B; font-size: 12px; }
+hr { border: none; border-top: 2px solid #DCEBFF; margin: 20px 0; }
+
+/* CARTE / FORMULAIRE */
+.card, fieldset {
+    background: white;
+    border: 1px solid #E6F0FF;
+    border-radius: 22px;
+    padding: 22px;
+    box-shadow: 0 10px 30px rgba(0, 102, 255, 0.10);
+    margin-bottom: 16px;
+}
+legend { font-size: 16px; font-weight: 800; color: #0066FF; padding: 0 8px; }
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0066FF;
+    margin-bottom: 6px;
+    margin-left: 4px;
+    text-align: left;
+}
+
+/* CHAMPS */
+input, select {
+    width: 100%;
+    padding: 15px 16px;
+    margin-top: 6px;
+    margin-bottom: 16px;
+    border: 2px solid #DCEBFF;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #222;
+    background: #F7FAFF;
+    box-sizing: border-box;
+}
+input::placeholder { color: #94A3B8; font-weight: 500; }
+input:focus, select:focus {
+    border-color: #0066FF;
+    outline: none;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.12);
+}
+input.vert:focus, select.vert:focus {
+    border-color: #00A651;
+    box-shadow: 0 0 0 4px rgba(0, 166, 81, 0.12);
+}
+input[type="checkbox"] {
+    width: 18px; height: 18px; padding: 0; margin: 0 8px 10px 0;
+    vertical-align: middle; accent-color: #00A651;
+}
+input[type="file"] {
+    padding: 12px;
+    background: white;
+    border: 2px dashed #0066FF;
+    color: #0066FF;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* DETAILS */
+details {
+    background: white;
+    border: 1px solid #E6F0FF;
+    border-radius: 22px;
+    padding: 18px;
+    box-shadow: 0 10px 30px rgba(0, 102, 255, 0.10);
+    margin-bottom: 16px;
+}
+details summary { font-weight: 800; color: #00A651; cursor: pointer; font-size: 16px; }
+details fieldset { box-shadow: none; border: none; padding: 0; margin-top: 10px; }
+
+/* BOUTONS */
+.btn {
+    display: block; text-align: center; text-decoration: none;
+    padding: 18px; border-radius: 14px; font-size: 17px; font-weight: 800;
+    color: white !important;
+}
+.btn-parent { background: #0066FF; box-shadow: 0 8px 20px rgba(0, 102, 255, 0.25); }
+.btn-directeur { background: #00A651; box-shadow: 0 8px 20px rgba(0, 166, 81, 0.3); }
+
+button {
+    background: #0066FF; color: white; border: none;
+    padding: 17px; width: 100%; border-radius: 14px;
+    font-size: 16px; font-weight: 800; cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0, 102, 255, 0.25);
+}
+button.vert { background: #00A651; box-shadow: 0 8px 20px rgba(0, 166, 81, 0.3); }
+button:active { transform: scale(0.98); }
+button[type="reset"], button.btn-gris {
+    background: #EEF2F7; color: #333; box-shadow: none; margin-top: 10px;
+}
+
+/* DASHBOARD - MENU */
+ul {
+    list-style: none; padding: 0; margin: 0;
+    background: white; border-radius: 18px; padding: 10px;
+    box-shadow: 0 10px 30px rgba(0, 102, 255, 0.10);
+}
+ul li {
+    padding: 14px 16px; font-weight: 700; font-size: 15px;
+    border-radius: 12px; color: #1E293B;
+}
+.sidebar ul { box-shadow: none; padding: 0; }
+.sidebar ul li { background: transparent; }
+.sidebar ul li a { color: #1E293B; text-decoration: none; display: block; }
+.sidebar ul li.active { background: #0066FF; color: white; }
+.sidebar ul li.active a { color: white; }
+
+/* DASHBOARD - TABLEAU */
+table {
+    width: 100%; border-collapse: collapse;
+    background: white; border-radius: 18px; overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 102, 255, 0.10);
+}
+th { background: #0066FF; color: white; padding: 12px 8px; font-size: 13px; text-align: left; }
+td { padding: 12px 8px; font-size: 14px; border-bottom: 1px solid #EAF4FF; color: #222; }
+table button { padding: 10px; font-size: 13px; background: #00A651; box-shadow: none; }
+
+/* ===== DASHBOARD DIRECTEUR ===== */
+
+body.page-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+.dashboard-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background: white;
+    padding: 22px 16px;
+    border-right: 1px solid #E6F0FF;
+}
+.sidebar .logo { font-size: 28px; margin-top: 0; }
+.sidebar .ecole-nom {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: #00A651;
+    margin-bottom: 20px;
+}
+.sidebar ul { box-shadow: none; padding: 0; }
+.sidebar ul li a { color: #1E293B; text-decoration: none; display: block; }
+.sidebar ul li.active { background: #0066FF; color: white; }
+.sidebar ul li.active a { color: white; }
+
+.contenu {
+    flex: 1;
+    padding: 24px;
+}
+.contenu h1, .contenu h2, .contenu p { text-align: left; }
+
+.kpi-grid {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.kpi {
+    flex: 1;
+    background: white;
+    border: 1px solid #E6F0FF;
+    border-radius: 22px;
+    padding: 22px;
+    box-shadow: 0 10px 30px rgba(0, 102, 255, 0.10);
+}
+.kpi small { font-weight: 700; color: #64748B; }
+.kpi b { font-size: 28px; color: #1E293B; display: block; margin: 8px 0 4px; }
+.kpi-bleu b { color: #0066FF; }
+.kpi-vert b { color: #00A651; }
+.kpi-orange b { color: #FF9F0A; }
+
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 800;
+}
+.badge-valide { background: #E6F7EE; color: #00A651; }
+.badge-attente { background: #FFF4E0; color: #FF9F0A; }
+.badge-special { background: #FEE6EA; color: #E11D48; }
+
+@media (max-width: 768px) {
+    .dashboard-layout { flex-direction: column; }
+    .sidebar { width: auto; border-right: none; }
+    .kpi-grid { flex-direction: column; }
+}
+
+
+
+/* ===== Boutons Documents - correction ===== */
+#page-documents #form-documents {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#page-documents button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#page-documents button[type="submit"] {
+  background: #16a34a;
+  color: white;
+}
+
+#page-documents #btn-retour {
+  background: #e5e7eb;
+  color: #111;
+}
+
+/* ===== Corrections mobile ===== */
+.badge { display: inline-block; white-space: nowrap; }
+td a { white-space: nowrap; }
+.contenu { min-width: 0; box-sizing: border-box; }
+@media (max-width: 768px) {
+  .dashboard-layout { display: block; }
+  .sidebar { width: auto; box-sizing: border-box; padding: 14px 12px; }
+  .sidebar .logo { font-size: 24px; margin-bottom: 4px; }
+  .sidebar .ecole-nom { margin-bottom: 10px; }
+  .sidebar ul { display: flex; overflow-x: auto; gap: 6px; }
+  .sidebar ul li { white-space: nowrap; padding: 10px 14px; flex: 0 0 auto; }
+  .sidebar button { padding: 12px; margin-top: 8px; }
+  .contenu { padding: 14px; }
+  .contenu table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  th, td { padding: 10px 6px; font-size: 13px; }
+}
+
+/* ===== Zone de test (dashboard directeur) ===== */
+.zone-test summary { color: #64748B; font-size: 14px; }
+.zone-test p { font-size: 14px; }
+.btn-danger { background: white; color: #E11D48; border: 2px solid #E11D48; box-shadow: none; }

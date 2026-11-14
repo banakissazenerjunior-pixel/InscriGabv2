@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classes | InscriGab</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="page-dashboard">
+
+<div class="dashboard-layout">
+
+  <!-- MENU -->
+  <aside class="sidebar">
+    <a href="index.html" class="logo">Inscri<span>Gab</span></a>
+    <div class="ecole-nom">Lycée Léon Mba<br><small>Directeur</small></div>
+
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="eleves.html">Élèves</a></li>
+      <li><a href="dossiers.html">Dossiers</a></li>
+      <li><a href="paiements.html">Paiements</a></li>
+      <li class="active"><a href="classes.html">Classes</a></li>
+      <li><a href="parametres.html">Paramètres</a></li>
+    </ul>
+
+    <p style="margin-top:30px;"><small>M. ONDO - Directeur</small></p>
+  </aside>
+
+  <!-- CONTENU -->
+  <main class="contenu" id="page-classes">
+    <h1>Classes - Lycée Léon Mba</h1>
+    <p>18 classes - 1 248 élèves</p>
+
+    <!-- TABLEAU CLASSES -->
+    <table>
+      <tr>
+        <th>CLASSE</th>
+        <th>ÉLÈVES</th>
+        <th>PLACES MAX</th>
+        <th>PLACES RESTANTES</th>
+        <th>STATUT</th>
+        <th></th>
+      </tr>
+      <tr>
+        <td><b>6ème A</b></td>
+        <td>45</td>
+        <td>50</td>
+        <td>5</td>
+        <td><span class="badge badge-valide">Ouverte</span></td>
+        <td><a href="eleves.html">Voir élèves →</a></td>
+      </tr>
+      <tr>
+        <td><b>6ème B</b></td>
+        <td>50</td>
+        <td>50</td>
+        <td>0</td>
+        <td><span class="badge badge-special">Pleine</span></td>
+        <td><a href="eleves.html">Voir élèves →</a></td>
+      </tr>
+      <tr>
+        <td><b>5ème A</b></td>
+        <td>38</td>
+        <td>50</td>
+        <td>12</td>
+        <td><span class="badge badge-valide">Ouverte</span></td>
+        <td><a href="eleves.html">Voir élèves →</a></td>
+      </tr>
+      <tr>
+        <td><b>5ème B</b></td>
+        <td>42</td>
+        <td>50</td>
+        <td>8</td>
+        <td><span class="badge badge-valide">Ouverte</span></td>
+        <td><a href="eleves.html">Voir élèves →</a></td>
+      </tr>
+      <tr>
+        <td><b>4ème A</b></td>
+        <td>47</td>
+        <td>50</td>
+        <td>3</td>
+        <td><span class="badge badge-attente">Presque pleine</span></td>
+        <td><a href="eleves.html">Voir élèves →</a></td>
+      </tr>
+      <tr>
+        <td><b>Terminale C</b></td>
+        <td>32</td>
+        <td>40</td>
+        <td>8</td>
+        <td><span class="badge badge-valide">Ouverte</span></td>
+        <td><a href="eleves.html">Voir élèves →</a></td>
+      </tr>
+    </table>
+
+    <!-- BOUTON CREER -->
+    <div class="card">
+      <h2 style="text-align:left;">Créer une nouvelle classe</h2>
+      <p style="text-align:left;">Exemple : Si 6ème B est pleine, tu crées 6ème C.</p>
+      <label>Nom de la classe</label>
+      <input type="text" placeholder="Ex : 6ème C">
+      <label>Nombre de places max</label>
+      <input type="number" placeholder="Ex : 50">
+      <button class="vert" style="margin-top:10px;">+ Créer la classe</button>
+    </div>
+
+  </main>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
