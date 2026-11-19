@@ -1,0 +1,36 @@
+INSCRIGAB — DOSSIER DE REPRISE
+Consolidation des derniers éléments retrouvés — 19 novembre 2026
+
+CONTENU
+- Frontend : pages HTML, style.css et app.js provenant de l'archive
+  InscriGab-abonnements-ecoles-prepare.zip (17 novembre 2026).
+- Supabase : migration préparant les paiements d'abonnements Airtel Money /
+  Moov Money, l'historique des paiements et l'archivage réversible des écoles.
+- Documentation : inventaire du backend Supabase inspecté le 19 novembre 2026.
+- Sources historiques : copie du fichier texte InscriGabv2_code_source.txt.
+
+ÉTAT ET LIMITES IMPORTANTES
+1. Cette archive est une consolidation des derniers fichiers disponibles dans
+   les éléments de travail retrouvés. Elle n'est pas une preuve que chaque
+   fichier correspond exactement à la version actuellement déployée en ligne.
+2. Le dossier backend est un inventaire technique, pas un dump SQL restaurable.
+   Il ne contient pas l'intégralité des définitions des tables, fonctions,
+   triggers, index, vues et politiques RLS.
+3. La migration incluse prépare la structure des abonnements et statuts d'école.
+   Vérifier l'état réel du projet Supabase et sauvegarder la base avant toute
+   exécution. Ne pas l'exécuter à l'aveugle si elle a déjà été appliquée.
+4. Les paiements réels Airtel Money / Moov Money ne sont pas opérationnels dans
+   ces fichiers : prestataire marchand, secrets serveur et webhook signé restent
+   à configurer. Aucun paiement ne doit être considéré comme confirmé sans
+   validation fiable côté serveur.
+5. Le bucket documents et la fonction Edge parent-document-upload sont décrits
+   dans l'inventaire, mais le code complet de cette fonction n'est pas inclus
+   dans les éléments retrouvés ici.
+6. Aucun secret, mot de passe ou clé service_role ne doit être ajouté au frontend
+   ou partagé dans une archive publique.
+
+PROCHAINE ÉTAPE TECHNIQUE RECOMMANDÉE
+Comparer ce dossier avec le projet Supabase actuellement connecté, exporter un
+schéma complet et les migrations, récupérer le code Edge Function déployé,
+puis tester les parcours d'inscription, documents, paiements et permissions
+sur un environnement de test avant toute mise en production.

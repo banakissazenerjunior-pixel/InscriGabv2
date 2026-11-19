@@ -7,7 +7,8 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="logo">Inscri<span>Gab</span></div>
+<a href="index.html" class="logo">Inscri<span>Gab</span></a>
+<p class="lien-accueil"><a href="index.html">← Retour à l'accueil</a></p>
 
 <h1>Étape 3 - Paiement de l'inscription</h1>
 <p>Plus qu'une étape, et le dossier de ton enfant sera complet.</p>
@@ -33,20 +34,19 @@
 <legend>Choisis ton moyen de paiement</legend>
 <label><input type="radio" name="moyen_paiement" value="airtel_money" checked> Airtel Money</label><br><br>
 <label><input type="radio" name="moyen_paiement" value="moov_money"> Moov Money</label><br><br>
-<label><input type="radio" name="moyen_paiement" value="orange_money"> Orange Money</label><br><br>
-<label><input type="radio" name="moyen_paiement" value="carte"> Carte Bancaire</label><br><br>
+<br>
+<label><input type="radio" name="moyen_paiement" value="carte" disabled> Carte Bancaire (bientôt disponible)</label><br><br>
 <label><input type="radio" name="moyen_paiement" value="especes"> Payer en espèces à l'école</label><br><br>
 </fieldset>
 <br>
 
 <fieldset>
 <legend>Infos pour le paiement</legend>
+<p id="instructions-depot"></p>
 <label>Numéro de téléphone qui va payer</label><br>
 <input type="tel" name="telephone_paiement" placeholder="Ex : 074 00 00 00"><br><br>
 <label>Nom sur le compte Mobile Money</label><br>
 <input type="text" name="nom_compte" placeholder="Ex : Mme Mba"><br><br>
-<label>Code de transaction - Si tu as déjà payé</label><br>
-<input type="text" name="code_transaction" placeholder="Ex : TX123456 - Laisse vide si pas encore payé"><br><br>
 </fieldset>
 <br>
 

@@ -18,22 +18,28 @@
       <li class="active"><a href="abonnements.html">Abonnements</a></li>
       <li><a href="sauvegardes.html">Sauvegardes</a></li>
       <li><a href="demandes-restauration.html">Demandes Restauration</a></li>
+      <li><a href="index.html">🏠 Accueil du site</a></li>
     </ul>
     <p style="margin-top:30px;"><small>Super Admin</small></p>
   </aside>
   <main class="contenu" id="page-sa-abonnements">
     <h1>Abonnements</h1>
-    <p>Toutes les écoles sont en Gratuit pour le moment.</p>
+    <p>Suivi des formules et des paiements d’abonnement de chaque établissement.</p>
     <div class="kpi-grid">
       <div class="kpi kpi-vert"><small>PLAN GRATUIT</small><b>12 écoles</b><small style="color:#00A651;">100% de la plateforme</small></div>
-      <div class="kpi kpi-bleu"><small>PLAN STANDARD</small><b>0 école</b><small style="color:#0066FF;">À venir</small></div>
-      <div class="kpi kpi-orange"><small>PLAN PREMIUM</small><b>0 école</b><small style="color:#FF9F0A;">À venir</small></div>
+      <div class="kpi kpi-bleu"><small>PLAN MENSUEL</small><b>0 école</b><small style="color:#0066FF;">Abonnements mensuels</small></div>
+      <div class="kpi kpi-orange"><small>PLAN ANNUEL</small><b>0 école</b><small style="color:#FF9F0A;">Abonnements annuels</small></div>
     </div>
-    <table>
-      <tr><th>ÉCOLE</th><th>PLAN ACTUEL</th><th>DEPUIS LE</th><th>STATUT</th><th></th></tr>
-      <tr><td><b>LYCÉE MODERNE</b></td><td><span class="badge badge-valide">Gratuit</span></td><td>12 Nov 2026</td><td><span class="badge badge-valide">Actif</span></td><td><a href="fiche-ecole.html">Voir</a></td></tr>
-      <tr><td><b>LYCÉE LÉON MBA</b></td><td><span class="badge badge-valide">Gratuit</span></td><td>12 Nov 2026</td><td><span class="badge badge-valide">Actif</span></td><td><a href="fiche-ecole.html">Voir</a></td></tr>
-      <tr><td><b>ÉCOLE LES PALMIERS</b></td><td><span class="badge badge-valide">Gratuit</span></td><td>12 Nov 2026</td><td><span class="badge badge-special">Cas spécial</span></td><td><a href="fiche-ecole.html">Voir</a></td></tr>
+    <h2>Abonnements des établissements</h2>
+    <table id="table-abonnements">
+      <thead><tr><th>ÉCOLE</th><th>FORMULE</th><th>MONTANT</th><th>DEPUIS LE</th><th>ÉCHÉANCE</th><th>ABONNEMENT</th><th>ÉCOLE</th><th></th></tr></thead>
+      <tbody><tr><td colspan="8">Chargement des abonnements…</td></tr></tbody>
+    </table>
+    <h2>Encaissements des abonnements InscriGab</h2>
+    <p>Seuls les paiements confirmés par le prestataire apparaîtront ici et dans le chiffre d’affaires du mois. Moyens prévus : Airtel Money et Moov Money. L’encaissement réel attend la configuration du compte marchand et des webhooks sécurisés.</p>
+    <table id="table-paiements-abonnements">
+      <thead><tr><th>ÉCOLE</th><th>RÉFÉRENCE</th><th>MONTANT</th><th>MOYEN</th><th>STATUT</th><th>PAYÉ LE</th></tr></thead>
+      <tbody><tr><td colspan="6">Chargement des paiements…</td></tr></tbody>
     </table>
     <p><a href="dashboardSuperadmin.html">← Retour au Dashboard</a></p>
   </main>

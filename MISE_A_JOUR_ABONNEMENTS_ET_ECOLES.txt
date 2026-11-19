@@ -1,0 +1,31 @@
+INSCRIGAB — MODIFICATIONS PRÉPARÉES
+
+1. Abonnements des écoles
+- Nouvelle page « Mon abonnement » dans l'espace Directeur.
+- Moyens retenus : Airtel Money et Moov Money uniquement.
+- Affichage de la formule, du montant, des dates et de l'historique.
+- Pour les écoles sur la formule gratuite, la page indique qu'aucun paiement n'est dû.
+- Pour les formules payantes, les commandes de paiement sont volontairement désactivées jusqu'à la configuration du compte marchand, du prestataire et des webhooks. Aucun paiement fictif n'est créé.
+
+2. Super Admin
+- La page Abonnements charge les abonnements depuis Supabase.
+- Ajout de l'historique des paiements d'abonnements.
+- Le chiffre d'affaires du mois additionne uniquement les paiements d'abonnement confirmés dans la table paiements_abonnements, et non les frais d'inscription des élèves.
+
+3. Gestion des écoles
+- Statuts opérationnels : active, désactivée, archivée.
+- Actions Super Admin : désactiver, archiver, réactiver/restaurer.
+- Historique des changements de statut avec motif et date.
+- Les écoles désactivées/archivées sont retirées du parcours public d'inscription.
+- Les comptes Directeur/Secrétaire d'une école suspendue perdent l'accès opérationnel, y compris les fonctions de gestion des permissions.
+- Aucune donnée scolaire ou financière n'est supprimée. Les liens de suivi parent existants sont conservés.
+
+4. Backend Supabase déjà modifié
+- Colonnes ajoutées à ecoles : statut_plateforme, statut_modifie_le, statut_modifie_par, motif_statut.
+- Tables ajoutées : paiements_abonnements, ecoles_statuts_historique.
+- RPC ajoutées : ma_abonnement, sa_paiements_abonnements, sa_modifier_statut_ecole.
+- RPC adaptées : ma_session, sa_ecoles, sa_ecole, sa_abonnements, sa_tableau_de_bord, lister_ecoles_ouvertes, lister_classes, soumettre_inscription, lister_permissions_ecole, modifier_permission_ecole.
+- RLS activée sur les nouvelles tables et accès directs aux données de paiement/historique fermés aux rôles anon et authenticated. Les consultations passent par des RPC contrôlées.
+
+IMPORTANT — PAIEMENTS RÉELS
+Les moyens choisis sont Airtel Money et Moov Money, mais le prestataire technique/compte marchand n'est pas encore connecté. Les clés API ne doivent jamais être mises dans app.js ou dans le navigateur. Il faudra configurer les secrets côté serveur, l'initialisation de transaction et un webhook signé qui seul pourra marquer un paiement comme payé.

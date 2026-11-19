@@ -295,3 +295,6 @@ td a { white-space: nowrap; }
 .zone-test summary { color: #64748B; font-size: 14px; }
 .zone-test p { font-size: 14px; }
 .btn-danger { background: white; color: #E11D48; border: 2px solid #E11D48; box-shadow: none; }
+
+/* Lien "retour à l'accueil" */
+.lien-accueil { margin: 0 0 12px; text-align: center; font-size: 14px; }
