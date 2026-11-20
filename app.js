@@ -54,7 +54,7 @@ function depuis(iso) {
 }
 // ================= PARTIE B : PAGES =================
 function pageReinitialisationMotDePasse() {
-  if (!/reset-password\.html$/.test(window.location.pathname)) return;
+  if (!/reset-password(\.html)?\/?$/.test(window.location.pathname)) return;
   const zone = document.getElementById('etat-reinitialisation');
   if (zone) zone.textContent = 'Vérification de ton lien de réinitialisation…';
   gererRetourEmail().then((traite) => {
@@ -63,7 +63,7 @@ function pageReinitialisationMotDePasse() {
 }
 document.addEventListener('DOMContentLoaded', function () {
   // Les liens de récupération doivent rester sur la page dédiée, pas repartir vers l'ancien écran.
-  if ((window.location.hash || '').includes('access_token=') && !/(directeur|superadmin)\.html$/.test(window.location.pathname) && !/reset-password\.html$/.test(window.location.pathname)) { window.location.replace('reset-password.html' + window.location.hash); return; }
+  if ((window.location.hash || '').includes('access_token=') && !/(directeur|superadmin)(\.html)?\/?$/.test(window.location.pathname) && !/reset-password(\.html)?\/?$/.test(window.location.pathname)) { window.location.replace('reset-password.html' + window.location.hash); return; }
   pageReinitialisationMotDePasse();
   pageParent();
   pageDocuments();
