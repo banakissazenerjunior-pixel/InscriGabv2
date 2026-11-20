@@ -1061,7 +1061,9 @@ async function pageParametresSb() {
     '<label>Numéro Airtel Money</label><input type="tel" name="numero_airtel_money" placeholder="Ex : 074 00 00 00" value="' + val(e.numero_airtel_money) + '">' +
     '<label>Numéro Moov Money</label><input type="tel" name="numero_moov_money" placeholder="Ex : 062 00 00 00" value="' + val(e.numero_moov_money) + '"></div>' +
     '<div class="card"><h2 style="text-align:left;">4. Documents obligatoires</h2><p style="text-align:left;">' + DOCS.map((d) => '<input type="checkbox" name="doc" value="' + d[0] + '"' + coche(d[0]) + '> ' + d[1] + '<br>').join('') + '</p>' +
-    '<button class="vert" type="submit" style="margin-top:10px;">Enregistrer mes changements</button><p id="message-parametres"></p></div></form>';
+    '<button class="vert" type="submit" style="margin-top:10px;">Enregistrer mes changements</button><p id="message-parametres"></p></div></form>' +
+    '<div class="card" id="carte-retrait"></div>';
+  carteRetraitEcole();
   $('form-parametres').addEventListener('submit', function (ev) {
     ev.preventDefault();
     const f = ev.target.elements;
@@ -1077,6 +1079,35 @@ async function pageParametresSb() {
       CTX = await rpcAuth('ma_session');
       $('message-parametres').textContent = 'Changements enregistrés ✅';
     });
+  });
+}
+
+// ---------- Demande de retrait de l'école (directeur) ----------
+async function carteRetraitEcole() {
+  const zone = $('carte-retrait');
+  if (!zone) return;
+  const titre = '<h2 style="text-align:left;">5. Retirer mon école de la plateforme</h2>';
+  const jour = (iso) => (iso ? new Date(iso).toLocaleDateString('fr-FR') : '');
+  let d = null;
+  try { d = await rpcAuth('ma_demande_retrait'); } catch (e) { d = null; }
+  if (d && d.statut === 'en_attente') {
+    zone.innerHTML = titre + '<p style="text-align:left;">Demande envoyée le ' + jour(d.created_at) + '. Elle attend la validation de l\'administrateur InscriGab. Ton école reste active en attendant.</p>' +
+      (d.motif ? '<p style="text-align:left;"><small>Ton message : ' + esc(d.motif) + '</small></p>' : '') +
+      '<button type="button" id="btn-annuler-retrait">Annuler ma demande</button>';
+    $('btn-annuler-retrait').addEventListener('click', function () {
+      if (!confirm('Annuler ta demande de retrait ?')) return;
+      agir(async function () { await rpcAuth('annuler_demande_retrait'); await carteRetraitEcole(); });
+    });
+    return;
+  }
+  const refus = d && d.statut === 'refusee' ? '<p style="text-align:left;"><b>Ta dernière demande a été refusée</b>' + (d.reponse ? ' : ' + esc(d.reponse) : '.') + '</p>' : '';
+  zone.innerHTML = titre + refus +
+    '<p style="text-align:left;">Si tu veux quitter la plateforme, envoie une demande à l\'administrateur. Rien n\'est supprimé tant qu\'il ne l\'a pas acceptée. Une fois acceptée, ton école n\'apparaît plus aux parents et tu n\'as plus accès à ton espace ; les données sont conservées.</p>' +
+    '<label>Pourquoi veux-tu partir ? (facultatif)</label><input type="text" id="retrait-motif" maxlength="500" placeholder="Ex : l\'école ferme, changement de système…">' +
+    '<button type="button" id="btn-retrait" style="margin-top:10px;background:#ff4444;color:white;">Demander le retrait de mon école</button>';
+  $('btn-retrait').addEventListener('click', function () {
+    if (!confirm('Envoyer la demande de retrait de ton école ? L\'administrateur devra l\'accepter.')) return;
+    agir(async function () { await rpcAuth('demander_retrait_ecole', { p_motif: $('retrait-motif').value.trim() || null }); await carteRetraitEcole(); });
   });
 }
 
@@ -1153,7 +1184,9 @@ Object.assign(MESSAGES_ERREUR, {
   ecole_introuvable: 'École introuvable.',
   demande_deja_traitee: 'Cette demande a déjà été traitée.',
   demande_introuvable: 'Demande introuvable.',
-  decision_invalide: 'Décision invalide.'
+  decision_invalide: 'Décision invalide.',
+  demande_deja_en_cours: 'Une demande de retrait est déjà en attente pour ton école.',
+  motif_trop_long: 'Le message est trop long (500 caractères maximum).'
 });
 const dateFr = (iso) => (iso ? new Date(iso).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : '—');
 const lienEcole = (e, txt) => '<a href="fiche-ecole.html?id=' + encodeURIComponent(e.id) + '">' + txt + '</a>';
@@ -1212,7 +1245,7 @@ async function initSuperAdmin() {
     bt.addEventListener('click', function () { deconnecter('superadmin.html'); });
     menu.appendChild(bt);
   }
-  const f = [saDashboard, saEcoles, saFicheEcole, saAbonnements, saUtilisateurs, saSauvegardes, saRestaurations];
+  const f = [saDashboard, saEcoles, saFicheEcole, saAbonnements, saUtilisateurs, saSauvegardes, saRestaurations, saRetraits];
   for (const fn of f) { try { await fn(); } catch (e) { if (e && e.session) { window.location.href = 'superadmin.html'; return; } console.error(e); } }
 }
 
@@ -1421,4 +1454,29 @@ async function saRestaurations() {
     const a = ev.target.closest('a[data-id]');
     if (a) { choisie = a.getAttribute('data-id'); afficher(); }
   });
+}
+
+// Demandes de retrait d'école envoyées par les directeurs (page demandes-restauration.html)
+async function saRetraits() {
+  const zone = $('bloc-retraits');
+  if (!zone) return;
+  async function afficher() {
+    const toutes = await rpcAuth('sa_demandes_retrait');
+    const att = toutes.filter((r) => r.statut === 'en_attente');
+    const passees = toutes.filter((r) => r.statut !== 'en_attente').slice(0, 5);
+    const etiquette = { acceptee: 'Acceptée', refusee: 'Refusée', annulee: 'Annulée' };
+    zone.innerHTML = '<h2>Demandes de retrait d\'école</h2>' +
+      (att.length ? att.map((r) => '<div class="card"><h2>' + esc(r.ecole) + (r.ville ? ' - ' + esc(r.ville) : '') + '</h2><p><b>Demandée le :</b> ' + dateFr(r.created_at) + '<br><b>Motif :</b> ' + esc(r.motif || '—') + '</p>' +
+        '<p><small>Accepter archive l\'école : elle disparaît pour les parents et le directeur perd l\'accès, mais les données sont conservées.</small></p>' +
+        '<button type="button" data-retrait="' + esc(r.id) + '" data-dec="acceptee">✅ Accepter le retrait</button><br><br><button type="button" data-retrait="' + esc(r.id) + '" data-dec="refusee">❌ Refuser</button></div>').join('') : '<p>Aucune demande de retrait en attente.</p>') +
+      (passees.length ? '<p><small>Dernières demandes traitées : ' + passees.map((r) => esc(r.ecole) + ' (' + (etiquette[r.statut] || esc(r.statut)) + ')').join(', ') + '</small></p>' : '');
+    zone.querySelectorAll('button[data-retrait]').forEach((b) => b.addEventListener('click', function () {
+      const dec = b.getAttribute('data-dec');
+      const reponse = prompt(dec === 'acceptee' ? 'Message pour le directeur (facultatif) :' : 'Pourquoi refuses-tu ? (facultatif)');
+      if (reponse === null) return;
+      if (!confirm(dec === 'acceptee' ? 'Accepter ce retrait ? L\'école sera archivée.' : 'Refuser cette demande ?')) return;
+      agir(async function () { await rpcAuth('sa_traiter_demande_retrait', { p_id: b.getAttribute('data-retrait'), p_decision: dec, p_reponse: reponse.trim() || null }); await afficher(); });
+    }));
+  }
+  await afficher();
 }
