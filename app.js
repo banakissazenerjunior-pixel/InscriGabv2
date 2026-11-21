@@ -511,6 +511,8 @@ Object.assign(MESSAGES_ERREUR, {
   captcha_indisponible: "La vérification anti-robot ne répond pas pour le moment. Réessaie dans quelques minutes.",
   captcha_non_configure: "L'inscription est momentanément indisponible. Contacte l'équipe InscriGab.",
   requete_trop_grande: "Ta demande est trop grande. Réduis le nombre d'enfants et réessaie.",
+  module_invalide: 'Module inconnu.',
+  module_non_active: "Ce module n'est pas activé pour ton école.",
   numero_ecole_manquant: "Cette école n'a pas encore renseigné son numéro Mobile Money. Contacte-la ou choisis un autre moyen de paiement.",
   ouverture_impossible_frais: "Fixe d'abord les frais d'inscription dans Paramètres avant d'ouvrir la session.",
   ouverture_impossible_classes: "Crée d'abord au moins une classe avant d'ouvrir la session.",
@@ -1365,10 +1367,12 @@ async function saFicheEcole() {
     '<div class="card"><h2>Gestion de l’accès à la plateforme</h2><p>' + badgeStatutPlateforme(e.statut_plateforme) + '</p>' +
     '<p>La désactivation bloque temporairement les comptes de l’école. L’archivage la retire des parcours actifs. Dans les deux cas, les dossiers, élèves et paiements sont conservés.</p>' +
     actionsStatutEcole(e) + '</div>' +
+    '<div class="card" id="carte-modules"></div>' +
     '<h2>Historique des changements de statut</h2><table><thead><tr><th>ANCIEN STATUT</th><th>NOUVEAU STATUT</th><th>MOTIF</th><th>DATE</th></tr></thead><tbody>' +
     ((e.historique_statuts || []).map((h) => '<tr><td>' + badgeStatutPlateforme(h.ancien_statut) + '</td><td>' + badgeStatutPlateforme(h.nouveau_statut) + '</td><td>' + esc(h.motif || '—') + '</td><td>' + new Date(h.modifie_le).toLocaleString('fr-FR') + '</td></tr>').join('') || '<tr><td colspan="4">Aucun changement enregistré.</td></tr>') +
     '</tbody></table>' +
     '<p><a href="dashboardSuperadmin.html">← Retour au Dashboard</a></p>'; 
+  saCarteModules(e.id);
   const decider = (val, msg) => { if (!confirm(msg)) return; agir(async function () { await rpcAuth('decider_ecole', { p_ecole: e.id, p_validation: val }); window.location.reload(); }); };
   $('btn-valider-ecole').addEventListener('click', () => decider('valide', 'Valider cette école ?'));
   $('btn-refuser-ecole').addEventListener('click', () => decider('refuse', 'Refuser cette école ?'));
@@ -1379,6 +1383,25 @@ async function saFicheEcole() {
     const action = statut === 'desactive' ? 'désactiver' : (statut === 'archivee' ? 'archiver' : 'réactiver/restaurer');
     if (!confirm('Confirmer : ' + action + ' ' + e.nom + ' ? Les données seront conservées.')) return;
     await agir(async () => { await rpcAuth('sa_modifier_statut_ecole', { p_ecole: e.id, p_statut: statut, p_motif: motif.trim() || null }); window.location.reload(); });
+  }));
+}
+
+// Modules optionnels d'une école (Super Admin) : l'inscription est toujours active
+async function saCarteModules(ecoleId) {
+  const zone = $('carte-modules');
+  if (!zone) return;
+  let m;
+  try { m = await rpcAuth('sa_modules_ecole', { p_ecole: ecoleId }); }
+  catch (err) { if (err.session) throw err; zone.innerHTML = '<h2>Modules</h2><p>' + esc(messageErreur(err)) + '</p>'; return; }
+  const ligne = (cle, titre) => '<p><b>' + titre + ' :</b> ' + (m[cle] ? '<span class="badge badge-valide">Activé</span>' : '<span class="badge">Désactivé</span>') +
+    '<br><button type="button" data-module="' + cle + '" data-actif="' + (m[cle] ? 'non' : 'oui') + '">' + (m[cle] ? 'Désactiver' : 'Activer') + '</button></p>';
+  zone.innerHTML = '<h2>Modules de l\'école</h2><p><b>Inscription :</b> <span class="badge badge-valide">Toujours activé</span></p>' +
+    ligne('finance', 'Gestion financière') + ligne('notes', 'Notes et bulletins') +
+    '<p><small>Désactiver un module ne supprime rien : les données restent, mais l\'école n\'y a plus accès.</small></p>';
+  zone.querySelectorAll('button[data-module]').forEach((b) => b.addEventListener('click', function () {
+    const activer = b.getAttribute('data-actif') === 'oui';
+    if (!confirm((activer ? 'Activer' : 'Désactiver') + ' ce module pour cette école ?')) return;
+    agir(async function () { await rpcAuth('sa_modifier_module', { p_ecole: ecoleId, p_module: b.getAttribute('data-module'), p_actif: activer }); await saCarteModules(ecoleId); });
   }));
 }
 
