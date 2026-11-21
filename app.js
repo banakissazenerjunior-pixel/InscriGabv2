@@ -1386,23 +1386,19 @@ async function saFicheEcole() {
   }));
 }
 
-// Modules optionnels d'une école (Super Admin) : l'inscription est toujours active
+// Modules d'une école (Super Admin) : lecture seule. C'est l'école qui active ses modules.
 async function saCarteModules(ecoleId) {
   const zone = $('carte-modules');
   if (!zone) return;
   let m;
   try { m = await rpcAuth('sa_modules_ecole', { p_ecole: ecoleId }); }
   catch (err) { if (err.session) throw err; zone.innerHTML = '<h2>Modules</h2><p>' + esc(messageErreur(err)) + '</p>'; return; }
-  const ligne = (cle, titre) => '<p><b>' + titre + ' :</b> ' + (m[cle] ? '<span class="badge badge-valide">Activé</span>' : '<span class="badge">Désactivé</span>') +
-    '<br><button type="button" data-module="' + cle + '" data-actif="' + (m[cle] ? 'non' : 'oui') + '">' + (m[cle] ? 'Désactiver' : 'Activer') + '</button></p>';
-  zone.innerHTML = '<h2>Modules de l\'école</h2><p><b>Inscription :</b> <span class="badge badge-valide">Toujours activé</span></p>' +
-    ligne('finance', 'Gestion financière') + ligne('notes', 'Notes et bulletins') +
-    '<p><small>Désactiver un module ne supprime rien : les données restent, mais l\'école n\'y a plus accès.</small></p>';
-  zone.querySelectorAll('button[data-module]').forEach((b) => b.addEventListener('click', function () {
-    const activer = b.getAttribute('data-actif') === 'oui';
-    if (!confirm((activer ? 'Activer' : 'Désactiver') + ' ce module pour cette école ?')) return;
-    agir(async function () { await rpcAuth('sa_modifier_module', { p_ecole: ecoleId, p_module: b.getAttribute('data-module'), p_actif: activer }); await saCarteModules(ecoleId); });
-  }));
+  const etat = (actif) => actif ? '<span class="badge badge-valide">Activé</span>' : '<span class="badge">Non activé</span>';
+  zone.innerHTML = '<h2>Modules choisis par l\'école</h2>' +
+    '<p><b>Inscription :</b> ' + etat(true) + '</p>' +
+    '<p><b>Gestion financière :</b> ' + etat(m.finance) + '</p>' +
+    '<p><b>Notes et bulletins :</b> ' + etat(m.notes) + '</p>' +
+    '<p><small>Chaque école active ses modules elle-même.</small></p>';
 }
 
 async function saAbonnements() {
