@@ -511,6 +511,14 @@ Object.assign(MESSAGES_ERREUR, {
   captcha_indisponible: "La vérification anti-robot ne répond pas pour le moment. Réessaie dans quelques minutes.",
   captcha_non_configure: "L'inscription est momentanément indisponible. Contacte l'équipe InscriGab.",
   requete_trop_grande: "Ta demande est trop grande. Réduis le nombre d'enfants et réessaie.",
+  scolarite_non_definie: "Le montant de la scolarité de cette classe n'est pas défini. Ajoute-le dans « Classes ».",
+  montant_superieur_au_reste: 'Ce montant dépasse ce qu\'il reste à payer pour ce mois.',
+  mois_hors_annee: 'Ce mois ne fait pas partie de l\'année scolaire.',
+  inscription_introuvable: 'Élève introuvable.',
+  montant_invalide: 'Montant invalide.',
+  paiement_introuvable: 'Paiement introuvable ou déjà annulé.',
+  scolarite_invalide: 'Montant de scolarité invalide.',
+  note_trop_longue: 'La note est trop longue (200 caractères maximum).',
   module_invalide: 'Module inconnu.',
   module_non_active: "Ce module n'est pas activé pour ton école.",
   numero_ecole_manquant: "Cette école n'a pas encore renseigné son numéro Mobile Money. Contacte-la ou choisis un autre moyen de paiement.",
@@ -832,14 +840,14 @@ async function initDirecteur() {
   }
   if (!CTX || !CTX.role || !CTX.ecole) { alert("Ce compte n'est rattaché à aucune école."); ecrireSession(null); window.location.href = 'directeur.html'; return; }
   const nom = document.querySelector('.sidebar .ecole-nom');
-  if (nom) nom.innerHTML = esc(CTX.ecole.nom) + '<br><small>' + (CTX.role === 'directeur' ? 'Directeur' : 'Secrétaire') + '</small>';
+  if (nom) nom.innerHTML = esc(CTX.ecole.nom) + '<br><small>' + 'Directeur' + '</small>';
   const pied = document.querySelector('.sidebar p small');
-  if (pied) pied.textContent = (CTX.nom || '') + ' - ' + (CTX.role === 'directeur' ? 'Directeur' : 'Secrétaire');
+  if (pied) pied.textContent = (CTX.nom || '') + ' - ' + 'Directeur';
   const h1 = document.querySelector('main h1');
   if (h1 && h1.textContent.includes('Lycée Léon Mba')) h1.textContent = h1.textContent.replace('Lycée Léon Mba', CTX.ecole.nom);
   const btnDeco = $('btn-deconnexion');
   if (btnDeco) btnDeco.addEventListener('click', function () { deconnecter('directeur.html'); });
-  const f = { dashboard: pageDashboardSb, eleves: pageElevesSb, dossiers: pageDossiersSb, paiements: pagePaiementsSb, classes: pageClassesSb, parametres: pageParametresSb, fiche: pageFicheSb, abonnement: pageMonAbonnement };
+  const f = { dashboard: pageDashboardSb, eleves: pageElevesSb, dossiers: pageDossiersSb, paiements: pagePaiementsSb, classes: pageClassesSb, scolarite: pageScolariteSb, parametres: pageParametresSb, fiche: pageFicheSb, abonnement: pageMonAbonnement };
   for (const k in f) { try { await f[k](); } catch (e) { if (e && e.session) { window.location.href = 'directeur.html'; return; } console.error(e); } }
 }
 async function chargerDossiers() { return await rpcAuth('dossiers_ecole'); }
@@ -1039,13 +1047,24 @@ async function pageClassesSb() {
     classes.forEach((c) => {
       const reste = Math.max(c.places_max - c.inscrits, 0);
       const badge = reste === 0 ? '<span class="badge badge-special">Pleine</span>' : (reste <= 3 ? '<span class="badge badge-attente">Presque pleine</span>' : '<span class="badge badge-valide">Ouverte</span>');
-      corps.insertAdjacentHTML('beforeend', '<tr><td><b>' + esc(c.nom_classe) + '</b></td><td>' + c.inscrits + '</td><td>' + c.places_max + '</td><td>' + reste + '</td><td>' + badge + '</td><td><a href="eleves.html">Voir élèves →</a>' + (peut('gerer_classes') && c.inscrits === 0 ? ' <a href="#" data-supp="' + c.id + '">Supprimer</a>' : '') + '</td></tr>');
+      corps.insertAdjacentHTML('beforeend', '<tr><td><b>' + esc(c.nom_classe) + '</b></td><td>' + c.inscrits + '</td><td>' + c.places_max + '</td><td>' + reste + '</td><td>' + badge + '</td><td>' + (c.scolarite_mensuelle > 0 ? esc(fcfa(c.scolarite_mensuelle)) : '<small>Non défini</small>') + (peut('gerer_classes') ? ' <a href="#" data-scol="' + c.id + '" data-nom="' + esc(c.nom_classe) + '" data-places="' + c.places_max + '" data-frais="' + (c.frais_inscription == null ? '' : c.frais_inscription) + '" data-montant="' + c.scolarite_mensuelle + '">Modifier</a>' : '') + '</td><td><a href="eleves.html">Voir élèves →</a>' + (peut('gerer_classes') && c.inscrits === 0 ? ' <a href="#" data-supp="' + c.id + '">Supprimer</a>' : '') + '</td></tr>');
     });
-    if (!classes.length) ligneVide(corps, 6, "Aucune classe. Crée ta première classe ci-dessous.");
+    if (!classes.length) ligneVide(corps, 7, "Aucune classe. Crée ta première classe ci-dessous.");
     if (compteur) compteur.textContent = classes.length + ' classes - ' + classes.reduce((s, c) => s + c.inscrits, 0) + ' élèves';
   }
   await afficher();
   table.addEventListener('click', function (ev) {
+    const m = ev.target.closest('a[data-scol]');
+    if (m) {
+      ev.preventDefault();
+      const saisie = prompt('Scolarité mensuelle (FCFA) pour ' + m.getAttribute('data-nom') + ' :', m.getAttribute('data-montant'));
+      if (saisie === null) return;
+      const montant = parseInt(saisie.replace(/\s/g, ''), 10);
+      if (isNaN(montant) || montant < 0) { alert('Mets un montant valide (0 ou plus).'); return; }
+      const frais = m.getAttribute('data-frais');
+      agir(async function () { await rpcAuth('enregistrer_classe', { p_id: Number(m.getAttribute('data-scol')), p_nom: m.getAttribute('data-nom'), p_places: Number(m.getAttribute('data-places')), p_frais: frais === '' ? null : Number(frais), p_scolarite: montant }); await afficher(); });
+      return;
+    }
     const a = ev.target.closest('a[data-supp]');
     if (!a) return;
     ev.preventDefault();
@@ -1060,8 +1079,94 @@ async function pageClassesSb() {
     const nom = inputs[0].value.trim();
     const places = parseInt(inputs[1].value, 10);
     if (!nom || !places || places < 1) { alert('Mets un nom et un nombre de places'); return; }
-    agir(async function () { await rpcAuth('enregistrer_classe', { p_id: null, p_nom: nom, p_places: places, p_frais: null }); inputs[0].value = ''; inputs[1].value = ''; await afficher(); });
+    agir(async function () { const scol = inputs[2] ? parseInt(inputs[2].value, 10) : NaN; await rpcAuth('enregistrer_classe', { p_id: null, p_nom: nom, p_places: places, p_frais: null, p_scolarite: isNaN(scol) ? 0 : scol }); inputs[0].value = ''; inputs[1].value = ''; if (inputs[2]) inputs[2].value = ''; await afficher(); });
   });
+}
+
+// ---------- scolarite.html : suivi des scolarités (module Gestion financière) ----------
+const NOMS_METHODES = { especes: 'Espèces', airtel_money: 'Airtel Money', moov_money: 'Moov Money', autre: 'Autre' };
+const moisFr = (iso) => { const t = new Date(iso + 'T00:00:00').toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }); return t.charAt(0).toUpperCase() + t.slice(1); };
+async function pageScolariteSb() {
+  const main = $('page-scolarite');
+  if (!main) return;
+  const titre = '<h1>Scolarités - ' + esc(CTX.ecole.nom) + '</h1>';
+  let eleves;
+  try { eleves = await rpcAuth('scolarite_vue'); }
+  catch (err) {
+    if (err.session) throw err;
+    const msg = String(err && err.message || '').includes('module_non_active')
+      ? '<div class="card"><h2 style="text-align:left;">Module non activé</h2><p style="text-align:left;">La gestion financière n\'est pas activée pour ton école. Tu peux l\'activer dans <a href="parametres.html">Paramètres</a>, carte « Mes modules ».</p></div>'
+      : '<p>' + esc(messageErreur(err)) + '</p>';
+    main.innerHTML = titre + msg; return;
+  }
+  const classes = Array.from(new Set(eleves.map((e) => e.classe))).sort();
+  const sans = eleves.filter((e) => e.statut === 'non_defini').length;
+  const tot = eleves.reduce((a, e) => { a.du += e.du; a.paye += e.paye; a.reste += e.reste; if (e.statut === 'en_retard') a.retard++; return a; }, { du: 0, paye: 0, reste: 0, retard: 0 });
+  main.innerHTML = titre + '<p>Mensualités de septembre à juin. Les élèves dont l\'inscription est validée apparaissent ici.</p>' +
+    '<div class="chiffres"><div class="chiffre"><p>Déjà payé</p><h2>' + esc(fcfa(tot.paye)) + '</h2></div><div class="chiffre"><p>Reste à payer (à ce jour)</p><h2>' + esc(fcfa(tot.reste)) + '</h2></div><div class="chiffre"><p>Élèves en retard</p><h2>' + tot.retard + ' / ' + eleves.length + '</h2></div></div>' +
+    (sans ? '<div class="card"><p style="text-align:left;">⚠️ ' + sans + ' élève(s) sont dans une classe sans montant de scolarité. Va dans <a href="classes.html">Classes</a> pour le définir.</p></div>' : '') +
+    '<div class="card" style="padding:16px;"><label>Filtrer</label><select id="filtre-classe"><option value="">Toutes les classes</option>' + classes.map((c) => '<option>' + esc(c) + '</option>').join('') + '</select>' +
+    '<select id="filtre-statut"><option value="">Tous</option><option value="en_retard">En retard</option><option value="a_payer">À payer ce mois</option><option value="a_jour">À jour</option></select>' +
+    '<input type="text" id="filtre-nom" placeholder="🔍 Rechercher un élève..."></div>' +
+    '<table id="table-scolarite"><thead><tr><th>ÉLÈVE</th><th>CLASSE</th><th>PAYÉ / DÛ</th><th>RESTE</th><th>STATUT</th><th></th></tr></thead><tbody></tbody></table>' +
+    '<div id="detail-scolarite"></div>';
+  const corps = main.querySelector('#table-scolarite tbody');
+  const BADGES = { en_retard: '<span class="badge badge-special">En retard</span>', a_payer: '<span class="badge badge-attente">À payer</span>', a_jour: '<span class="badge badge-valide">À jour</span>', non_defini: '<span class="badge">Scolarité non définie</span>' };
+  function lister() {
+    const fc = $('filtre-classe').value, fs = $('filtre-statut').value, fn = $('filtre-nom').value.trim().toLowerCase();
+    corps.innerHTML = '';
+    const vus = eleves.filter((e) => (!fc || e.classe === fc) && (!fs || e.statut === fs) && (!fn || e.eleve.toLowerCase().includes(fn)));
+    vus.forEach((e) => corps.insertAdjacentHTML('beforeend', '<tr><td><b>' + esc(e.eleve) + '</b></td><td>' + esc(e.classe) + '</td><td>' + esc(fcfa(e.paye)) + ' / ' + esc(fcfa(e.du)) + '</td><td>' + esc(fcfa(e.reste)) + '</td><td>' + (BADGES[e.statut] || '') + (e.mois_en_retard > 0 ? '<br><small>' + e.mois_en_retard + ' mois en retard</small>' : '') + '</td><td><a href="#" data-detail="' + e.inscription_id + '">Détail →</a></td></tr>'));
+    if (!vus.length) ligneVide(corps, 6, eleves.length ? 'Aucun élève ne correspond.' : 'Aucun élève validé pour le moment.');
+  }
+  lister();
+  ['filtre-classe', 'filtre-statut'].forEach((id) => $(id).addEventListener('change', lister));
+  $('filtre-nom').addEventListener('input', lister);
+  corps.addEventListener('click', function (ev) {
+    const a = ev.target.closest('a[data-detail]');
+    if (!a) return;
+    ev.preventDefault();
+    agir(async function () { await detailScolarite(Number(a.getAttribute('data-detail'))); });
+  });
+
+  async function detailScolarite(id) {
+    const d = await rpcAuth('scolarite_detail', { p_inscription: id });
+    const STAT = { solde: '✅ Payé', partiel: '🟠 Partiel', impaye: '🔴 Impayé', a_venir: '⚪ À venir', non_defini: '—' };
+    const aPayer = d.mois.filter((m) => m.reste > 0);
+    const zone = $('detail-scolarite');
+    zone.innerHTML = '<div class="card"><h2 style="text-align:left;">' + esc(d.eleve) + ' - ' + esc(d.classe) + '</h2><p style="text-align:left;">Scolarité : <b>' + esc(fcfa(d.mensualite)) + '</b> par mois</p>' +
+      '<table><thead><tr><th>MOIS</th><th>PAYÉ</th><th>RESTE</th><th>ÉTAT</th></tr></thead><tbody>' +
+      d.mois.map((m) => '<tr><td>' + esc(moisFr(m.mois)) + '</td><td>' + esc(fcfa(m.paye)) + '</td><td>' + esc(fcfa(m.reste)) + '</td><td>' + (STAT[m.statut] || '') + '</td></tr>').join('') + '</tbody></table></div>' +
+      (d.mensualite > 0 && aPayer.length ? '<div class="card"><h2 style="text-align:left;">Enregistrer un paiement</h2>' +
+        '<label>Pour quel mois ?</label><select id="pay-mois">' + aPayer.map((m) => '<option value="' + esc(m.mois) + '" data-reste="' + m.reste + '">' + esc(moisFr(m.mois)) + ' (reste ' + esc(fcfa(m.reste)) + ')</option>').join('') + '</select>' +
+        '<label>Montant reçu (FCFA)</label><input type="number" id="pay-montant" min="1">' +
+        '<label>Moyen de paiement</label><select id="pay-methode">' + Object.keys(NOMS_METHODES).map((k) => '<option value="' + k + '">' + NOMS_METHODES[k] + '</option>').join('') + '</select>' +
+        '<label>Note (facultatif)</label><input type="text" id="pay-note" maxlength="200" placeholder="Ex : payé par la maman">' +
+        '<button class="vert" id="btn-pay" style="margin-top:10px;">Enregistrer le paiement</button></div>' : '') +
+      '<div class="card"><h2 style="text-align:left;">Paiements enregistrés</h2>' +
+      (d.paiements.length ? '<table><thead><tr><th>DATE</th><th>MOIS</th><th>MONTANT</th><th>MOYEN</th><th></th></tr></thead><tbody>' + d.paiements.map((p) => '<tr' + (p.annule ? ' style="opacity:.5;text-decoration:line-through;"' : '') + '><td>' + esc(new Date(p.date_paiement + 'T00:00:00').toLocaleDateString('fr-FR')) + '</td><td>' + esc(moisFr(p.mois)) + '</td><td>' + esc(fcfa(p.montant)) + '</td><td>' + esc(NOMS_METHODES[p.methode] || p.methode) + (p.note ? '<br><small>' + esc(p.note) + '</small>' : '') + '</td><td>' + (p.annule ? '<small>Annulé</small>' : '<a href="#" data-annuler="' + p.id + '">Annuler</a>') + '</td></tr>').join('') + '</tbody></table>' : '<p>Aucun paiement pour le moment.</p>') + '</div>';
+    zone.scrollIntoView({ behavior: 'smooth' });
+    const sel = $('pay-mois'), mont = $('pay-montant');
+    if (sel && mont) { const maj = () => { mont.value = sel.options[sel.selectedIndex].getAttribute('data-reste'); }; sel.addEventListener('change', maj); maj(); }
+    if ($('btn-pay')) $('btn-pay').addEventListener('click', function () {
+      const montant = parseInt($('pay-montant').value, 10);
+      if (!montant || montant < 1) { alert('Mets le montant reçu.'); return; }
+      agir(async function () {
+        await rpcAuth('enregistrer_paiement_scolarite', { p_inscription: id, p_mois: $('pay-mois').value, p_montant: montant, p_methode: $('pay-methode').value, p_note: $('pay-note').value.trim() || null });
+        eleves.splice(0, eleves.length, ...(await rpcAuth('scolarite_vue')));
+        await detailScolarite(id); lister();
+      });
+    });
+    zone.querySelectorAll('a[data-annuler]').forEach((a) => a.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      if (!confirm('Annuler ce paiement ? Il restera visible dans l\'historique, barré.')) return;
+      agir(async function () {
+        await rpcAuth('annuler_paiement_scolarite', { p_id: Number(a.getAttribute('data-annuler')) });
+        eleves.splice(0, eleves.length, ...(await rpcAuth('scolarite_vue')));
+        await detailScolarite(id); lister();
+      });
+    }));
+  }
 }
 
 // ---------- parametres.html ----------
@@ -1450,7 +1555,7 @@ async function saUtilisateurs() {
   const corps = viderTableau(table);
   users.forEach((u) => {
     const statut = u.role === 'super_admin' ? 'Actif' : (u.ecole_validation === 'refuse' ? 'Suspendu' : (u.ecole_validation === 'a_verifier' ? 'En attente' : 'Actif'));
-    const role = u.role === 'super_admin' ? 'Super Admin' : (u.role === 'directeur' ? 'Directeur' : 'Secrétaire');
+    const role = u.role === 'super_admin' ? 'Super Admin' : 'Directeur';
     corps.insertAdjacentHTML('beforeend', '<tr><td><b>' + esc((u.prenom + ' ' + u.nom).trim()) + '</b></td><td>' + role + '</td><td>' + esc(u.ecole || '—') + '</td><td>' + esc(u.email) + '</td><td><span class="badge ' + (statut === 'Actif' ? 'badge-valide' : (statut === 'Suspendu' ? 'badge-special' : 'badge-attente')) + '">' + statut + '</span></td><td>' + (u.ecole_id ? lienEcole({ id: u.ecole_id }, 'Voir école') : '') + '</td></tr>');
   });
   if (!users.length) ligneVide(corps, 6, 'Aucun utilisateur.');
