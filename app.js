@@ -125,6 +125,18 @@ async function rpc(nom, args) {
   if (!r.ok) throw new Error((data && (data.message || data.error)) || 'erreur_' + r.status);
   return data;
 }
+// L'inscription d'un parent passe par la fonction serveur « inscription-parent » :
+// elle vérifie le test anti-robot (Cloudflare Turnstile) avant d'enregistrer le dossier.
+async function appelerInscriptionParent(corps) {
+  let r;
+  try {
+    r = await fetch(SUPABASE_URL + '/functions/v1/inscription-parent', { method: 'POST', headers: enteteSupabase({ 'Content-Type': 'application/json' }), body: JSON.stringify(corps) });
+  } catch (e) { throw new Error('reseau'); }
+  let data = null;
+  try { data = await r.json(); } catch (e) { /* réponse vide */ }
+  if (!r.ok) throw new Error((data && (data.message || data.error)) || 'erreur_' + r.status);
+  return data;
+}
 // Les documents passent par la fonction serveur « parent-document-upload » :
 // 1) elle vérifie le lien du parent et donne une adresse d'envoi temporaire (sign)
 // 2) le site dépose le fichier à cette adresse
@@ -252,11 +264,15 @@ async function pageParent() {
     if (enfants.some((x) => x.ecole !== ecoleId)) { alert('Tous les enfants doivent être dans la même école. Fais une inscription séparée pour une autre école.'); return; }
     if (enfants.some((x) => !x.classe_id)) { alert('Choisis une classe pour chaque enfant'); return; }
 
+    const jeton = form.elements['cf-turnstile-response'] ? form.elements['cf-turnstile-response'].value : '';
+    if (!jeton) { alert('Attends la fin de la vérification anti-robot (quelques secondes), puis appuie à nouveau sur Envoyer.'); return; }
+
     enCours = true;
     const bouton = form.querySelector('button[type=submit]');
     const deverrouiller = verrouiller(bouton, 'Envoi en cours…');
     try {
-      const r = await rpc('soumettre_inscription', {
+      const r = await appelerInscriptionParent({
+        token: jeton,
         p_ecole: Number(ecoleId), p_parent_nom: parentNom, p_parent_tel: parentTel, p_annee: v('annee_scolaire'),
         p_enfants: enfants.map((x) => ({ nom: x.nom, prenom: x.prenom, date_naissance: x.date_naissance, sexe: x.sexe, classe_id: x.classe_id }))
       });
@@ -264,6 +280,7 @@ async function pageParent() {
       window.location.href = 'documents.html';
     } catch (err) {
       alert(messageErreur(err));
+      try { if (window.turnstile) window.turnstile.reset(); } catch (e) { /* ignoré */ }
       enCours = false; deverrouiller();
     }
   });
@@ -490,6 +507,10 @@ Object.assign(MESSAGES_ERREUR, {
   places_inferieures_aux_inscrits: 'Il y a déjà plus d\'inscrits que ce nombre de places.',
   places_invalides: 'Nombre de places invalide (1 à 500).',
   nom_classe_invalide: 'Nom de classe invalide.',
+  captcha_invalide: "La vérification anti-robot a échoué. Réessaie.",
+  captcha_indisponible: "La vérification anti-robot ne répond pas pour le moment. Réessaie dans quelques minutes.",
+  captcha_non_configure: "L'inscription est momentanément indisponible. Contacte l'équipe InscriGab.",
+  requete_trop_grande: "Ta demande est trop grande. Réduis le nombre d'enfants et réessaie.",
   numero_ecole_manquant: "Cette école n'a pas encore renseigné son numéro Mobile Money. Contacte-la ou choisis un autre moyen de paiement.",
   ouverture_impossible_frais: "Fixe d'abord les frais d'inscription dans Paramètres avant d'ouvrir la session.",
   ouverture_impossible_classes: "Crée d'abord au moins une classe avant d'ouvrir la session.",
