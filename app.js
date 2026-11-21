@@ -1073,7 +1073,7 @@ async function pageParametresSb() {
   const coche = (k) => ((e.docs_demandes || []).includes(k) ? ' checked' : '');
   const val = (x) => esc(x == null ? '' : x);
   main.innerHTML =
-    '<h1>Paramètres de l\'école</h1><p>Seul le Directeur peut changer ça.</p><form id="form-parametres">' +
+    '<h1>Paramètres de l\'école</h1><p>Seul le Directeur peut changer ça.</p><div class="card" id="carte-mes-modules"></div><form id="form-parametres">' +
     '<div class="card"><h2 style="text-align:left;">1. Mon école</h2><label>Nom de l\'école</label><input type="text" name="nom" value="' + val(e.nom) + '" required maxlength="150">' +
     '<label>Ville</label><input type="text" name="ville" value="' + val(e.ville) + '" maxlength="100"><label>Nom du directeur</label><input type="text" name="nom_directeur" value="' + val(e.nom_directeur) + '" maxlength="100">' +
     '<label>Téléphone</label><input type="tel" name="telephone_directeur" value="' + val(e.telephone_directeur) + '" maxlength="30"></div>' +
@@ -1085,6 +1085,7 @@ async function pageParametresSb() {
     '<div class="card"><h2 style="text-align:left;">4. Documents obligatoires</h2><p style="text-align:left;">' + DOCS.map((d) => '<input type="checkbox" name="doc" value="' + d[0] + '"' + coche(d[0]) + '> ' + d[1] + '<br>').join('') + '</p>' +
     '<button class="vert" type="submit" style="margin-top:10px;">Enregistrer mes changements</button><p id="message-parametres"></p></div></form>' +
     '<div class="card" id="carte-retrait"></div>';
+  carteMesModules();
   carteRetraitEcole();
   $('form-parametres').addEventListener('submit', function (ev) {
     ev.preventDefault();
@@ -1102,6 +1103,30 @@ async function pageParametresSb() {
       $('message-parametres').textContent = 'Changements enregistrés ✅';
     });
   });
+}
+
+// ---------- Mes modules (directeur) : toujours visibles, activables ou désactivables ----------
+async function carteMesModules() {
+  const zone = $('carte-mes-modules');
+  if (!zone) return;
+  let m;
+  try { m = await rpcAuth('mes_modules'); }
+  catch (err) { if (err.session) throw err; zone.innerHTML = '<h2 style="text-align:left;">Mes modules</h2><p>' + esc(messageErreur(err)) + '</p>'; return; }
+  const bloc = (cle, titre, texte) =>
+    '<div style="text-align:left;margin-bottom:14px;"><b>' + titre + '</b> ' +
+    (m[cle] ? '<span class="badge badge-valide">Activé</span>' : '<span class="badge">Non activé</span>') +
+    '<br><small>' + texte + '</small><br><button type="button" data-module="' + cle + '" data-actif="' + (m[cle] ? 'non' : 'oui') + '">' + (m[cle] ? 'Désactiver' : 'Activer') + '</button></div>';
+  zone.innerHTML = '<h2 style="text-align:left;">Mes modules</h2>' +
+    '<div style="text-align:left;margin-bottom:14px;"><b>Inscription</b> <span class="badge badge-valide">Toujours inclus</span><br><small>Les parents inscrivent leurs enfants en ligne.</small></div>' +
+    bloc('finance', 'Gestion financière', 'Scolarités, reçus, relances, dépenses et bilan.') +
+    bloc('notes', 'Notes et bulletins', 'Saisie des notes et bulletins par trimestre.') +
+    '<p style="text-align:left;"><small>Tu peux activer ou désactiver un module quand tu veux. Désactiver ne supprime aucune donnée.</small></p>';
+  zone.querySelectorAll('button[data-module]').forEach((b) => b.addEventListener('click', function () {
+    const activer = b.getAttribute('data-actif') === 'oui';
+    const nom = b.getAttribute('data-module') === 'finance' ? 'la gestion financière' : 'les notes et bulletins';
+    if (!confirm((activer ? 'Activer ' : 'Désactiver ') + nom + ' ?')) return;
+    agir(async function () { await rpcAuth('modifier_mon_module', { p_module: b.getAttribute('data-module'), p_actif: activer }); await carteMesModules(); });
+  }));
 }
 
 // ---------- Demande de retrait de l'école (directeur) ----------
