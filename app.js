@@ -1083,15 +1083,34 @@ async function pageClassesSb() {
   });
 }
 
-// ---------- scolarite.html : suivi des scolarités (module Gestion financière) ----------
+// ---------- scolarite.html : suivi des scolarités par mois et par classe (module Gestion financière) ----------
 const NOMS_METHODES = { especes: 'Espèces', airtel_money: 'Airtel Money', moov_money: 'Moov Money', autre: 'Autre' };
 const moisFr = (iso) => { const t = new Date(iso + 'T00:00:00').toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }); return t.charAt(0).toUpperCase() + t.slice(1); };
+const CLE_RELANCES = 'inscrigab_relances';
+function relancesLues() { try { return JSON.parse(localStorage.getItem(CLE_RELANCES) || '{}'); } catch (e) { return {}; } }
+function relanceNotee(cle) { try { const r = relancesLues(); r[cle] = new Date().toISOString().slice(0, 10); localStorage.setItem(CLE_RELANCES, JSON.stringify(r)); } catch (e) { /* ignoré */ } }
+// Lien WhatsApp avec le message de relance déjà écrit (numéro gabonais : indicatif 241)
+function lienRelance(e, moisIso) {
+  let n = String(e.parent_tel || '').replace(/\D/g, '');
+  if (!n) return null;
+  if (!n.startsWith('241')) { if (n.startsWith('0')) n = n.slice(1); n = '241' + n; }
+  const montant = Math.max(e.reste_cumule, e.reste_mois);
+  const msg = 'Bonjour ' + (e.parent_nom || '') + ', ici ' + CTX.ecole.nom + '. La scolarité de ' + e.eleve + ' (' + e.classe + ') n\'est pas encore réglée pour ' + moisFr(moisIso).toLowerCase() + '. Montant restant à payer : ' + fcfa(montant) + '. Merci de régulariser dès que possible.';
+  return 'https://wa.me/' + n + '?text=' + encodeURIComponent(msg);
+}
 async function pageScolariteSb() {
   const main = $('page-scolarite');
   if (!main) return;
   const titre = '<h1>Scolarités - ' + esc(CTX.ecole.nom) + '</h1>';
-  let eleves;
-  try { eleves = await rpcAuth('scolarite_vue'); }
+  // Année scolaire : de septembre à juin
+  const auj = new Date();
+  const debutAnnee = auj.getMonth() >= 8 ? auj.getFullYear() : auj.getFullYear() - 1;
+  const listeMois = [];
+  for (let i = 0; i < 10; i++) { const d = new Date(debutAnnee, 8 + i, 1); listeMois.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-01'); }
+  const courant = auj.getFullYear() + '-' + String(auj.getMonth() + 1).padStart(2, '0') + '-01';
+  let moisChoisi = listeMois.includes(courant) ? courant : (courant > listeMois[9] ? listeMois[9] : listeMois[0]);
+  let liste;
+  try { liste = await rpcAuth('scolarite_mois', { p_mois: moisChoisi }); }
   catch (err) {
     if (err.session) throw err;
     const msg = String(err && err.message || '').includes('module_non_active')
@@ -1099,30 +1118,70 @@ async function pageScolariteSb() {
       : '<p>' + esc(messageErreur(err)) + '</p>';
     main.innerHTML = titre + msg; return;
   }
-  const classes = Array.from(new Set(eleves.map((e) => e.classe))).sort();
-  const sans = eleves.filter((e) => e.statut === 'non_defini').length;
-  const tot = eleves.reduce((a, e) => { a.du += e.du; a.paye += e.paye; a.reste += e.reste; if (e.statut === 'en_retard') a.retard++; return a; }, { du: 0, paye: 0, reste: 0, retard: 0 });
-  main.innerHTML = titre + '<p>Mensualités de septembre à juin. Les élèves dont l\'inscription est validée apparaissent ici.</p>' +
-    '<div class="chiffres"><div class="chiffre"><p>Déjà payé</p><h2>' + esc(fcfa(tot.paye)) + '</h2></div><div class="chiffre"><p>Reste à payer (à ce jour)</p><h2>' + esc(fcfa(tot.reste)) + '</h2></div><div class="chiffre"><p>Élèves en retard</p><h2>' + tot.retard + ' / ' + eleves.length + '</h2></div></div>' +
-    (sans ? '<div class="card"><p style="text-align:left;">⚠️ ' + sans + ' élève(s) sont dans une classe sans montant de scolarité. Va dans <a href="classes.html">Classes</a> pour le définir.</p></div>' : '') +
-    '<div class="card" style="padding:16px;"><label>Filtrer</label><select id="filtre-classe"><option value="">Toutes les classes</option>' + classes.map((c) => '<option>' + esc(c) + '</option>').join('') + '</select>' +
-    '<select id="filtre-statut"><option value="">Tous</option><option value="en_retard">En retard</option><option value="a_payer">À payer ce mois</option><option value="a_jour">À jour</option></select>' +
+  const classes = Array.from(new Set(liste.map((e) => e.classe))).sort();
+  main.innerHTML = titre + '<p>Choisis un mois pour voir qui a payé et qui doit encore, classe par classe. Mensualités de septembre à juin.</p>' +
+    '<div class="card" style="padding:16px;"><label>Mois</label><select id="filtre-mois">' + listeMois.map((m) => '<option value="' + m + '"' + (m === moisChoisi ? ' selected' : '') + '>' + esc(moisFr(m)) + '</option>').join('') + '</select>' +
+    '<label>Classe</label><select id="filtre-classe"><option value="">Toutes les classes</option>' + classes.map((c) => '<option>' + esc(c) + '</option>').join('') + '</select>' +
+    '<label>Statut</label><select id="filtre-statut"><option value="">Tous</option><option value="a_relancer">À relancer (impayé ou partiel)</option><option value="solde">Payé</option><option value="a_venir">À venir</option></select>' +
     '<input type="text" id="filtre-nom" placeholder="🔍 Rechercher un élève..."></div>' +
-    '<table id="table-scolarite"><thead><tr><th>ÉLÈVE</th><th>CLASSE</th><th>PAYÉ / DÛ</th><th>RESTE</th><th>STATUT</th><th></th></tr></thead><tbody></tbody></table>' +
+    '<div id="zone-chiffres"></div>' +
+    '<h2>Par classe</h2><table id="table-classes"><thead><tr><th>CLASSE</th><th>ÉLÈVES</th><th>ENCAISSÉ / ATTENDU</th><th>À RELANCER</th><th></th></tr></thead><tbody></tbody></table>' +
+    '<h2>Élèves</h2><table id="table-scolarite"><thead><tr><th>ÉLÈVE</th><th>CLASSE</th><th>CE MOIS</th><th>RESTE TOTAL</th><th>STATUT</th><th></th></tr></thead><tbody></tbody></table>' +
     '<div id="detail-scolarite"></div>';
-  const corps = main.querySelector('#table-scolarite tbody');
-  const BADGES = { en_retard: '<span class="badge badge-special">En retard</span>', a_payer: '<span class="badge badge-attente">À payer</span>', a_jour: '<span class="badge badge-valide">À jour</span>', non_defini: '<span class="badge">Scolarité non définie</span>' };
-  function lister() {
+  const corpsEleves = main.querySelector('#table-scolarite tbody');
+  const corpsClasses = main.querySelector('#table-classes tbody');
+  const BADGES = { solde: '<span class="badge badge-valide">Payé</span>', partiel: '<span class="badge badge-attente">Partiel</span>', impaye: '<span class="badge badge-special">Impayé</span>', a_venir: '<span class="badge">À venir</span>', non_defini: '<span class="badge">Scolarité non définie</span>', hors_annee: '<span class="badge">Hors année</span>' };
+  const compte = (e) => e.statut !== 'non_defini' && e.statut !== 'hors_annee';
+  const aRelancer = (e) => e.statut === 'impaye' || e.statut === 'partiel';
+
+  function rendre() {
     const fc = $('filtre-classe').value, fs = $('filtre-statut').value, fn = $('filtre-nom').value.trim().toLowerCase();
-    corps.innerHTML = '';
-    const vus = eleves.filter((e) => (!fc || e.classe === fc) && (!fs || e.statut === fs) && (!fn || e.eleve.toLowerCase().includes(fn)));
-    vus.forEach((e) => corps.insertAdjacentHTML('beforeend', '<tr><td><b>' + esc(e.eleve) + '</b></td><td>' + esc(e.classe) + '</td><td>' + esc(fcfa(e.paye)) + ' / ' + esc(fcfa(e.du)) + '</td><td>' + esc(fcfa(e.reste)) + '</td><td>' + (BADGES[e.statut] || '') + (e.mois_en_retard > 0 ? '<br><small>' + e.mois_en_retard + ' mois en retard</small>' : '') + '</td><td><a href="#" data-detail="' + e.inscription_id + '">Détail →</a></td></tr>'));
-    if (!vus.length) ligneVide(corps, 6, eleves.length ? 'Aucun élève ne correspond.' : 'Aucun élève validé pour le moment.');
+    const vus = liste.filter((e) => (!fc || e.classe === fc) && (!fn || e.eleve.toLowerCase().includes(fn)) && (!fs || (fs === 'a_relancer' ? aRelancer(e) : e.statut === fs)));
+    const base = liste.filter((e) => (!fc || e.classe === fc) && compte(e));
+    const attendu = base.reduce((a, e) => a + e.mensualite, 0);
+    const encaisse = base.reduce((a, e) => a + Math.min(e.paye_mois, e.mensualite), 0);
+    const nbRel = base.filter(aRelancer).length;
+    const sans = liste.filter((e) => e.statut === 'non_defini').length;
+    $('zone-chiffres').innerHTML = '<div class="chiffres"><div class="chiffre"><p>Encaissé ce mois</p><h2>' + esc(fcfa(encaisse)) + '</h2></div><div class="chiffre"><p>Reste à encaisser</p><h2>' + esc(fcfa(attendu - encaisse)) + '</h2></div><div class="chiffre"><p>Élèves à relancer</p><h2>' + nbRel + ' / ' + base.length + '</h2></div></div>' +
+      (sans ? '<div class="card"><p style="text-align:left;">⚠️ ' + sans + ' élève(s) sont dans une classe sans montant de scolarité. Va dans <a href="classes.html">Classes</a> pour le définir.</p></div>' : '');
+
+    corpsClasses.innerHTML = '';
+    classes.forEach((c) => {
+      const d = liste.filter((e) => e.classe === c && compte(e));
+      const att = d.reduce((a, e) => a + e.mensualite, 0), enc = d.reduce((a, e) => a + Math.min(e.paye_mois, e.mensualite), 0), rel = d.filter(aRelancer).length;
+      corpsClasses.insertAdjacentHTML('beforeend', '<tr><td><b>' + esc(c) + '</b></td><td>' + liste.filter((e) => e.classe === c).length + '</td><td>' + esc(fcfa(enc)) + ' / ' + esc(fcfa(att)) + '</td><td>' + (rel ? '<span class="badge badge-special">' + rel + '</span>' : '<span class="badge badge-valide">0</span>') + '</td><td><a href="#" data-classe="' + esc(c) + '">Voir →</a></td></tr>');
+    });
+    if (!classes.length) ligneVide(corpsClasses, 5, 'Aucun élève validé pour le moment.');
+
+    corpsEleves.innerHTML = '';
+    const rel = relancesLues();
+    vus.forEach((e) => {
+      let action = '<a href="#" data-detail="' + e.inscription_id + '">Détail →</a>';
+      if (aRelancer(e)) {
+        const lien = lienRelance(e, moisChoisi);
+        const cle = CTX.ecole.nom + '|' + e.inscription_id + '|' + moisChoisi;
+        action += '<br>' + (lien ? '<a href="' + esc(lien) + '" target="_blank" rel="noopener" data-relance="' + esc(cle) + '">📲 Relancer</a>' + (rel[cle] ? '<br><small>✓ Relancé le ' + esc(new Date(rel[cle] + 'T00:00:00').toLocaleDateString('fr-FR')) + '</small>' : '') : '<small>Pas de numéro</small>');
+      }
+      corpsEleves.insertAdjacentHTML('beforeend', '<tr><td><b>' + esc(e.eleve) + '</b><br><small>' + esc(e.parent_nom || '') + '</small></td><td>' + esc(e.classe) + '</td><td>' + esc(fcfa(e.paye_mois)) + ' / ' + esc(fcfa(e.mensualite)) + '</td><td>' + esc(fcfa(e.reste_cumule)) + '</td><td>' + (BADGES[e.statut] || '') + '</td><td>' + action + '</td></tr>');
+    });
+    if (!vus.length) ligneVide(corpsEleves, 6, liste.length ? 'Aucun élève ne correspond.' : 'Aucun élève validé pour le moment.');
   }
-  lister();
-  ['filtre-classe', 'filtre-statut'].forEach((id) => $(id).addEventListener('change', lister));
-  $('filtre-nom').addEventListener('input', lister);
-  corps.addEventListener('click', function (ev) {
+  async function recharger() { liste = await rpcAuth('scolarite_mois', { p_mois: moisChoisi }); rendre(); }
+  rendre();
+
+  $('filtre-mois').addEventListener('change', function () { moisChoisi = this.value; agir(recharger); });
+  ['filtre-classe', 'filtre-statut'].forEach((id) => $(id).addEventListener('change', rendre));
+  $('filtre-nom').addEventListener('input', rendre);
+  corpsClasses.addEventListener('click', function (ev) {
+    const a = ev.target.closest('a[data-classe]');
+    if (!a) return;
+    ev.preventDefault();
+    $('filtre-classe').value = a.getAttribute('data-classe'); rendre();
+    $('table-scolarite').scrollIntoView({ behavior: 'smooth' });
+  });
+  corpsEleves.addEventListener('click', function (ev) {
+    const r = ev.target.closest('a[data-relance]');
+    if (r) { relanceNotee(r.getAttribute('data-relance')); setTimeout(rendre, 400); return; }
     const a = ev.target.closest('a[data-detail]');
     if (!a) return;
     ev.preventDefault();
@@ -1153,8 +1212,7 @@ async function pageScolariteSb() {
       if (!montant || montant < 1) { alert('Mets le montant reçu.'); return; }
       agir(async function () {
         await rpcAuth('enregistrer_paiement_scolarite', { p_inscription: id, p_mois: $('pay-mois').value, p_montant: montant, p_methode: $('pay-methode').value, p_note: $('pay-note').value.trim() || null });
-        eleves.splice(0, eleves.length, ...(await rpcAuth('scolarite_vue')));
-        await detailScolarite(id); lister();
+        await recharger(); await detailScolarite(id);
       });
     });
     zone.querySelectorAll('a[data-annuler]').forEach((a) => a.addEventListener('click', function (ev) {
@@ -1162,8 +1220,7 @@ async function pageScolariteSb() {
       if (!confirm('Annuler ce paiement ? Il restera visible dans l\'historique, barré.')) return;
       agir(async function () {
         await rpcAuth('annuler_paiement_scolarite', { p_id: Number(a.getAttribute('data-annuler')) });
-        eleves.splice(0, eleves.length, ...(await rpcAuth('scolarite_vue')));
-        await detailScolarite(id); lister();
+        await recharger(); await detailScolarite(id);
       });
     }));
   }
