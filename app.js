@@ -825,7 +825,7 @@ function pageDirecteurAuth() {
 let CTX = null;
 const peut = (p) => !!(CTX && CTX.permissions && CTX.permissions.includes(p));
 async function initDirecteur() {
-  const ids = ['dashboard-ecole', 'page-eleves', 'page-dossiers', 'page-paiements', 'page-classes', 'page-parametres', 'page-fiche-eleve', 'page-mon-abonnement'];
+  const ids = ['dashboard-ecole', 'page-eleves', 'page-dossiers', 'page-paiements', 'page-classes', 'page-scolarite', 'page-parametres', 'page-fiche-eleve', 'page-mon-abonnement'];
   if (!ids.some((id) => $(id))) return;
   try { CTX = await rpcAuth('ma_session'); }
   catch (e) {
