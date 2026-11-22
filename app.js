@@ -69,6 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
   pageDocuments();
   pagePaiement();
   pageRecu();
+  pagePayerScolarite();
   pageDirecteurAuth();
   pageSuperAdminAuth();
   initSuperAdmin();
@@ -451,7 +452,7 @@ async function pageRecu() {
         '<p><b>École :</b> ' + esc(i.ecole.nom) + ' - ' + esc(i.ecole.ville) + '</p><p><b>Année scolaire :</b> ' + esc(i.annee_scolaire) + '</p><br>' +
         '<p><b>Élève :</b> ' + nom + '</p><p><b>Classe :</b> ' + esc(i.classe) + '</p><p><b>Parent :</b> ' + esc(dossier.parent.nom) + '</p><br>' +
         '<p><b>Statut :</b> ADMIS - Peut entrer en classe</p><p><b>Validé le :</b> ' + (i.valide_le ? new Date(i.valide_le).toLocaleDateString('fr-FR') : '—') + '</p>' +
-        '<p><b>N° Billet :</b> ' + esc(num) + '</p></fieldset><br>';
+        '<p><b>N° Billet :</b> ' + esc(num) + '</p><br><a href="payer-scolarite.html#' + esc(parent.lien) + '">💳 Payer la scolarité</a></fieldset><br>';
     }
     if (i.statut === 'refuse') return '<fieldset><legend>' + nom + '</legend><p>❌ Dossier refusé par l\'école. Contacte-la pour plus d\'informations.</p></fieldset><br>';
     const p = i.paiement;
@@ -467,6 +468,90 @@ async function pageRecu() {
     if (navigator.clipboard) navigator.clipboard.writeText(champ.value).then(() => alert('Lien copié ✅'), () => alert('Copie le lien manuellement'));
     else alert('Copie le lien manuellement');
   });
+}
+
+// ---------- payer-scolarite.html : le parent paie la scolarité de ses enfants ----------
+async function pagePayerScolarite() {
+  const zone = $('page-payer-scolarite');
+  if (!zone) return;
+  window.addEventListener('hashchange', function () { window.location.reload(); });
+  const lienUrl = decodeURIComponent((window.location.hash || '').replace('#', '')).trim();
+  if (/^[0-9a-f]{64}$/.test(lienUrl)) localStorage.setItem(CLE_PARENT, JSON.stringify({ lien: lienUrl, dossier: null }));
+  const parent = getParent();
+  const entete = '<h1>Payer la scolarité</h1>';
+  if (!parent) { zone.innerHTML = entete + '<p>Aucune inscription trouvée sur cet appareil. Ouvre le lien de suivi reçu à l\'inscription.</p><a href="parent.html">Faire une inscription</a>'; return; }
+  const retour = '<br><a href="recu.html#' + esc(parent.lien) + '">← Retour au suivi du dossier</a>';
+  zone.innerHTML = entete + '<p>Chargement…</p>';
+  let enfants;
+  try { enfants = await rpc('scolarite_parent', { p_lien: parent.lien }); }
+  catch (e) { zone.innerHTML = entete + '<p>' + esc(messageErreur(e)) + '</p><button type="button" onclick="window.location.reload()">Réessayer</button>'; return; }
+  if (!enfants.length) { zone.innerHTML = entete + '<p>Aucun élève validé pour le moment. Tu pourras payer la scolarité dès que l\'école aura validé l\'inscription de ton enfant.</p>' + retour; return; }
+
+  const ETAT = { solde: '✅ Payé', partiel: '🟠 Partiel', impaye: '🔴 À payer', a_venir: '⚪ À venir', en_attente: '⏳ En attente de confirmation', non_defini: '—' };
+  const NOM_MOYEN = { airtel_money: 'Airtel Money', moov_money: 'Moov Money' };
+  zone.innerHTML = entete + '<p>Paie la scolarité de ton enfant directement depuis ton téléphone : l\'argent va tout droit à l\'école.</p><div id="liste-enfants"></div>' + retour;
+  const liste = $('liste-enfants');
+
+  enfants.forEach(function (c, idx) {
+    const moyens = ['airtel_money', 'moov_money'].filter((k) => c['numero_' + k]);
+    const payables = c.mois.filter((m) => m.reste > 0 && m.statut !== 'en_attente' && m.statut !== 'non_defini');
+    let html = '<fieldset data-enfant="' + idx + '"><legend>' + esc(c.eleve) + ' - ' + esc(c.classe) + '</legend><p><b>École :</b> ' + esc(c.ecole) + ' (' + esc(c.ville) + ')</p>';
+    if (!c.disponible) {
+      html += '<p>Le paiement de la scolarité en ligne n\'est pas encore ouvert par cette école. Rapproche-toi de l\'école pour le moment.</p></fieldset><br>';
+      liste.insertAdjacentHTML('beforeend', html); return;
+    }
+    html += '<p><b>Scolarité :</b> ' + esc(fcfa(c.mensualite)) + ' par mois</p>' +
+      '<table><thead><tr><th></th><th>MOIS</th><th>RESTE</th><th>ÉTAT</th></tr></thead><tbody>' +
+      c.mois.map(function (m) {
+        const ok = payables.includes(m);
+        return '<tr><td>' + (ok ? '<input type="checkbox" class="case-mois" value="' + esc(m.mois) + '" data-reste="' + m.reste + '">' : '') + '</td><td>' + esc(moisFr(m.mois)) + '</td><td>' + esc(fcfa(m.reste)) + '</td><td>' + (ETAT[m.statut] || '') + (m.statut === 'en_attente' ? '<br><a href="#" data-annuler="' + esc(m.mois) + '">Annuler</a>' : '') + '</td></tr>';
+      }).join('') + '</tbody></table>';
+    if (!payables.length) html += '<p>✅ Rien à payer pour le moment.</p></fieldset><br>';
+    else if (!moyens.length) html += '<p>⚠️ Cette école n\'a pas encore renseigné de numéro Mobile Money. Contacte-la.</p></fieldset><br>';
+    else {
+      html += '<p><b>Coche les mois à payer</b>, puis choisis ton moyen de paiement :</p>' +
+        moyens.map(function (k, j) { return '<label><input type="radio" name="moyen-' + idx + '" value="' + k + '"' + (j === 0 ? ' checked' : '') + '> ' + NOM_MOYEN[k] + '</label><br>'; }).join('') +
+        '<br><button type="button" class="btn-continuer">Continuer</button><div class="zone-instructions"></div></fieldset><br>';
+    }
+    liste.insertAdjacentHTML('beforeend', html);
+  });
+
+  liste.addEventListener('click', function (ev) {
+    const champ = ev.target.closest('fieldset[data-enfant]');
+    if (!champ) return;
+    const c = enfants[Number(champ.getAttribute('data-enfant'))];
+    const annul = ev.target.closest('a[data-annuler]');
+    if (annul) {
+      ev.preventDefault();
+      if (!confirm('Annuler ta déclaration de paiement pour ce mois ?')) return;
+      agirParent(async function () { await rpc('annuler_declaration_parent', { p_lien: parent.lien, p_inscription: c.inscription_id, p_mois: annul.getAttribute('data-annuler') }); window.location.reload(); });
+      return;
+    }
+    if (ev.target.closest('.btn-continuer')) {
+      const mois = Array.from(champ.querySelectorAll('.case-mois:checked'));
+      if (!mois.length) { alert('Coche au moins un mois à payer.'); return; }
+      const moyen = champ.querySelector('input[type=radio]:checked').value;
+      const total = mois.reduce((a, m) => a + Number(m.getAttribute('data-reste')), 0);
+      const zoneI = champ.querySelector('.zone-instructions');
+      zoneI.innerHTML = '<div class="card"><h2 style="text-align:left;">Étape 1 : envoie l\'argent</h2>' +
+        '<p style="text-align:left;">Depuis ton téléphone, envoie <b>' + esc(fcfa(total)) + '</b> par <b>' + NOM_MOYEN[moyen] + '</b> au numéro :</p><h2>' + esc(c['numero_' + moyen]) + '</h2>' +
+        '<p style="text-align:left;"><small>Envoie exactement ce montant, pour que l\'école reconnaisse ton paiement.</small></p>' +
+        '<h2 style="text-align:left;">Étape 2 : préviens l\'école</h2><p style="text-align:left;">Quand tu as envoyé l\'argent, appuie sur le bouton ci-dessous. L\'école confirmera la réception.</p>' +
+        '<button type="button" class="vert btn-jai-paye">J\'ai payé ' + esc(fcfa(total)) + '</button></div>';
+      zoneI.querySelector('.btn-jai-paye').addEventListener('click', function () {
+        const btn = this;
+        agirParent(async function () {
+          const d = await rpc('declarer_paiement_scolarite', { p_lien: parent.lien, p_inscription: c.inscription_id, p_mois: mois.map((m) => m.value), p_methode: moyen });
+          alert('Merci ! Ta déclaration de ' + fcfa(d.total) + ' est enregistrée. L\'école va confirmer la réception de ton paiement.');
+          window.location.reload();
+        }, btn);
+      });
+    }
+  });
+  async function agirParent(fn, btn) {
+    const deverrouiller = btn ? verrouiller(btn, 'Envoi…') : function () {};
+    try { await fn(); } catch (e) { alert(messageErreur(e)); deverrouiller(); }
+  }
 }
 
 // ================= PARTIE C : DIRECTEUR (connecté à Supabase) =================
@@ -519,6 +604,11 @@ Object.assign(MESSAGES_ERREUR, {
   paiement_introuvable: 'Paiement introuvable ou déjà annulé.',
   scolarite_invalide: 'Montant de scolarité invalide.',
   note_trop_longue: 'La note est trop longue (200 caractères maximum).',
+  declaration_deja_en_attente: "Une déclaration de paiement est déjà en attente pour ce mois.",
+  declarations_en_attente: "Des parents ont déclaré des paiements à traiter. Confirme-les ou refuse-les dans la page Scolarités avant de désactiver ce module.",
+  mois_deja_paye: "Ce mois est déjà payé.",
+  declaration_introuvable: "Déclaration introuvable ou déjà traitée.",
+  mois_invalide: "Choisis au moins un mois à payer.",
   module_invalide: 'Module inconnu.',
   module_non_active: "Ce module n'est pas activé pour ton école.",
   numero_ecole_manquant: "Cette école n'a pas encore renseigné son numéro Mobile Money. Contacte-la ou choisis un autre moyen de paiement.",
@@ -1120,6 +1210,7 @@ async function pageScolariteSb() {
   }
   const classes = Array.from(new Set(liste.map((e) => e.classe))).sort();
   main.innerHTML = titre + '<p>Choisis un mois pour voir qui a payé et qui doit encore, classe par classe. Mensualités de septembre à juin.</p>' +
+    '<div id="zone-declarations"></div>' +
     '<div class="card" style="padding:16px;"><label>Mois</label><select id="filtre-mois">' + listeMois.map((m) => '<option value="' + m + '"' + (m === moisChoisi ? ' selected' : '') + '>' + esc(moisFr(m)) + '</option>').join('') + '</select>' +
     '<label>Classe</label><select id="filtre-classe"><option value="">Toutes les classes</option>' + classes.map((c) => '<option>' + esc(c) + '</option>').join('') + '</select>' +
     '<label>Statut</label><select id="filtre-statut"><option value="">Tous</option><option value="a_relancer">À relancer (impayé ou partiel)</option><option value="solde">Payé</option><option value="a_venir">À venir</option></select>' +
@@ -1168,6 +1259,26 @@ async function pageScolariteSb() {
   }
   async function recharger() { liste = await rpcAuth('scolarite_mois', { p_mois: moisChoisi }); rendre(); }
   rendre();
+
+  // Paiements que les parents disent avoir faits : l'école confirme la réception ou refuse
+  async function chargerDeclarations() {
+    const zoneD = $('zone-declarations');
+    let lst = [];
+    try { lst = await rpcAuth('declarations_scolarite'); } catch (err) { if (err.session) throw err; zoneD.innerHTML = ''; return; }
+    if (!lst.length) { zoneD.innerHTML = ''; return; }
+    zoneD.innerHTML = '<div class="card"><h2 style="text-align:left;">💬 Paiements déclarés par les parents (' + lst.length + ')</h2><p style="text-align:left;"><small>Vérifie dans ton application Mobile Money que l\'argent est bien arrivé avant de confirmer.</small></p>' +
+      '<table><thead><tr><th>ÉLÈVE</th><th>MOIS</th><th>MONTANT</th><th></th></tr></thead><tbody>' +
+      lst.map((d) => '<tr><td><b>' + esc(d.eleve) + '</b><br><small>' + esc(d.classe) + ' - ' + esc(d.parent_nom || '') + '</small></td><td>' + esc(moisFr(d.mois)) + '</td><td>' + esc(fcfa(d.montant)) + '<br><small>' + esc(NOMS_METHODES[d.methode] || d.methode) + '</small></td><td><a href="#" data-decl="' + d.id + '" data-dec="confirmee">✅ Bien reçu</a><br><a href="#" data-decl="' + d.id + '" data-dec="refusee">❌ Pas reçu</a></td></tr>').join('') + '</tbody></table></div>';
+  }
+  $('zone-declarations').addEventListener('click', function (ev) {
+    const a = ev.target.closest('a[data-decl]');
+    if (!a) return;
+    ev.preventDefault();
+    const ok = a.getAttribute('data-dec') === 'confirmee';
+    if (!confirm(ok ? 'Confirmer que tu as bien reçu cet argent ? Le paiement sera ajouté au suivi.' : 'Refuser cette déclaration ? Le parent devra la refaire.')) return;
+    agir(async function () { await rpcAuth('traiter_declaration_scolarite', { p_id: Number(a.getAttribute('data-decl')), p_decision: a.getAttribute('data-dec') }); await recharger(); await chargerDeclarations(); });
+  });
+  await chargerDeclarations();
 
   $('filtre-mois').addEventListener('change', function () { moisChoisi = this.value; agir(recharger); });
   ['filtre-classe', 'filtre-statut'].forEach((id) => $(id).addEventListener('change', rendre));
