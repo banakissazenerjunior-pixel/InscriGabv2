@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paramètres | InscriGab</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="page-dashboard">
+
+<div class="dashboard-layout">
+
+  <!-- MENU -->
+  <aside class="sidebar">
+    <a href="index.html" class="logo">Inscri<span>Gab</span></a>
+    <div class="ecole-nom">Lycée Léon Mba<br><small>Directeur</small></div>
+
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="eleves.html">Élèves</a></li>
+      <li><a href="dossiers.html">Dossiers</a></li>
+      <li><a href="paiements.html">Paiements</a></li>
+      <li><a href="scolarite.html">Scolarités</a></li>
+      <li><a href="depenses.html">Dépenses</a></li>
+      <li><a href="bilan.html">Bilan</a></li>
+      <li><a href="mon-abonnement.html">Mon abonnement</a></li>
+      <li><a href="classes.html">Classes</a></li>
+      <li class="active"><a href="parametres.html">Paramètres</a></li>
+      <li><a href="index.html">🏠 Accueil du site</a></li>
+    </ul>
+
+    <p style="margin-top:30px;"><small>M. ONDO - Directeur</small></p>
+  </aside>
+
+  <!-- CONTENU -->
+  <main class="contenu" id="page-parametres">
+    <h1>Paramètres de l'école</h1>
+    <p>Seul le Directeur peut changer ça.</p>
+
+    <!-- 1. INFO ECOLE -->
+    <div class="card">
+      <h2 style="text-align:left;">1. Mon école</h2>
+      <label>Nom de l'école</label>
+      <input type="text" value="Lycée Léon Mba">
+      <label>Ville</label>
+      <input type="text" value="Libreville">
+      <label>Année scolaire</label>
+      <select>
+        <option>2026 - 2027</option>
+        <option>2025 - 2026</option>
+      </select>
+    </div>
+
+    <!-- 2. FRAIS -->
+    <div class="card">
+      <h2 style="text-align:left;">2. Frais d'inscription</h2>
+      <label>Frais 6ème - 5ème - 4ème - 3ème</label>
+      <input type="number" value="85000">
+      <label>Frais 2nde - 1ère</label>
+      <input type="number" value="95000">
+      <label>Frais Terminale</label>
+      <input type="number" value="120000">
+      <p style="text-align:left;"><small>C'est ce prix qui va s'afficher dans la page Paiements.</small></p>
+    </div>
+
+    <!-- 3. DOCUMENTS -->
+    <div class="card">
+      <h2 style="text-align:left;">3. Documents obligatoires</h2>
+      <p style="text-align:left;">
+        <input type="checkbox" checked> Acte de naissance<br>
+        <input type="checkbox" checked> Photo d'identité<br>
+        <input type="checkbox" checked> Bulletin de l'année dernière<br>
+        <input type="checkbox"> Certificat de résidence<br>
+      </p>
+    </div>
+
+    <!-- 4. MON COMPTE -->
+    <div class="card">
+      <h2 style="text-align:left;">4. Mon compte Directeur</h2>
+      <label>Nom</label>
+      <input type="text" value="M. ONDO">
+      <label>Mot de passe</label>
+      <input type="password" value="123456">
+      <button class="vert" style="margin-top:10px;">Enregistrer mes changements</button>
+    </div>
+
+  </main>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

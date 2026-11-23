@@ -298,3 +298,11 @@ td a { white-space: nowrap; }
 
 /* Lien "retour à l'accueil" */
 .lien-accueil { margin: 0 0 12px; text-align: center; font-size: 14px; }
+
+
+/* Impression */
+@media print {
+  .sidebar, .no-print { display: none !important; }
+  .contenu, main { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+  body { background: #fff !important; }
+}

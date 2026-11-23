@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
   pagePaiement();
   pageRecu();
   pagePayerScolarite();
+  pageRecuScolarite();
   pageDirecteurAuth();
   pageSuperAdminAuth();
   initSuperAdmin();
@@ -470,6 +471,126 @@ async function pageRecu() {
   });
 }
 
+// ---------- Outils communs au module Gestion financière ----------
+function anneeScolaireCourante() { const a = new Date(); const y = a.getMonth() >= 8 ? a.getFullYear() : a.getFullYear() - 1; return y + '-' + (y + 1); }
+function afficherErreurFinance(main, titre, err) {
+  if (err.session) throw err;
+  main.innerHTML = titre + (String(err && err.message || '').includes('module_non_active')
+    ? '<div class="card"><h2 style="text-align:left;">Module non activé</h2><p style="text-align:left;">La gestion financière n\'est pas activée pour ton école. Tu peux l\'activer dans <a href="parametres.html">Paramètres</a>, carte « Mes modules ».</p></div>'
+    : '<p>' + esc(messageErreur(err)) + '</p>');
+}
+const CATEGORIES_DEPENSES = { salaire: 'Salaire du personnel', fournitures: 'Fournitures', entretien: 'Entretien et réparations', eau_electricite: 'Eau et électricité', loyer: 'Loyer', transport: 'Transport', autre: 'Autre' };
+const jourFr = (iso) => new Date(iso + 'T00:00:00').toLocaleDateString('fr-FR');
+
+// ---------- depenses.html : dépenses et salaires de l'école ----------
+async function pageDepensesSb() {
+  const main = $('page-depenses');
+  if (!main) return;
+  const titre = '<h1>Dépenses et salaires - ' + esc(CTX.ecole.nom) + '</h1>';
+  const annee = anneeScolaireCourante();
+  let liste;
+  try { liste = await rpcAuth('depenses_liste', { p_annee: annee }); } catch (err) { afficherErreurFinance(main, titre, err); return; }
+  const auj = new Date().toISOString().slice(0, 10);
+  const debut = parseInt(annee.slice(0, 4), 10);
+  const moisAnnee = []; for (let i = 0; i < 12; i++) { const d = new Date(debut, 8 + i, 1); moisAnnee.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')); }
+  main.innerHTML = titre + '<p>Année scolaire ' + esc(annee) + '. Note ici tout ce que l\'école dépense : salaires, fournitures, loyer…</p>' +
+    '<div id="zone-chiffres-dep"></div>' +
+    '<div class="card"><h2 style="text-align:left;">Ajouter une dépense</h2>' +
+    '<label>Date</label><input type="date" id="dep-date" value="' + auj + '">' +
+    '<label>Catégorie</label><select id="dep-cat">' + Object.keys(CATEGORIES_DEPENSES).map((k) => '<option value="' + k + '">' + CATEGORIES_DEPENSES[k] + '</option>').join('') + '</select>' +
+    '<label>Description</label><input type="text" id="dep-lib" maxlength="120" placeholder="Ex : Salaire de septembre">' +
+    '<label>Nom de la personne (pour un salaire, facultatif)</label><input type="text" id="dep-ben" maxlength="100" placeholder="Ex : M. Nze">' +
+    '<label>Montant (FCFA)</label><input type="number" id="dep-montant" min="1" placeholder="Ex : 150000">' +
+    '<button class="vert" id="btn-dep" style="margin-top:10px;">Enregistrer la dépense</button></div>' +
+    '<div class="card" style="padding:16px;"><label>Filtrer</label><select id="dep-f-cat"><option value="">Toutes les catégories</option>' + Object.keys(CATEGORIES_DEPENSES).map((k) => '<option value="' + k + '">' + CATEGORIES_DEPENSES[k] + '</option>').join('') + '</select>' +
+    '<select id="dep-f-mois"><option value="">Toute l\'année</option>' + moisAnnee.map((m) => '<option value="' + m + '">' + esc(moisFr(m + '-01')) + '</option>').join('') + '</select></div>' +
+    '<table id="table-depenses"><thead><tr><th>DATE</th><th>CATÉGORIE</th><th>DESCRIPTION</th><th>MONTANT</th><th></th></tr></thead><tbody></tbody></table>';
+  const corps = main.querySelector('#table-depenses tbody');
+  function rendre() {
+    const fc = $('dep-f-cat').value, fm = $('dep-f-mois').value;
+    const actives = liste.filter((d) => !d.annule);
+    const total = actives.reduce((a, d) => a + d.montant, 0), sal = actives.filter((d) => d.categorie === 'salaire').reduce((a, d) => a + d.montant, 0);
+    const moisCourant = auj.slice(0, 7), ceMois = actives.filter((d) => d.date.slice(0, 7) === moisCourant).reduce((a, d) => a + d.montant, 0);
+    $('zone-chiffres-dep').innerHTML = '<div class="chiffres"><div class="chiffre"><p>Dépenses de l\'année</p><h2>' + esc(fcfa(total)) + '</h2></div><div class="chiffre"><p>dont salaires</p><h2>' + esc(fcfa(sal)) + '</h2></div><div class="chiffre"><p>Ce mois-ci</p><h2>' + esc(fcfa(ceMois)) + '</h2></div></div>';
+    corps.innerHTML = '';
+    const vus = liste.filter((d) => (!fc || d.categorie === fc) && (!fm || d.date.slice(0, 7) === fm));
+    vus.forEach((d) => corps.insertAdjacentHTML('beforeend', '<tr' + (d.annule ? ' style="opacity:.5;text-decoration:line-through;"' : '') + '><td>' + esc(jourFr(d.date)) + '</td><td>' + esc(CATEGORIES_DEPENSES[d.categorie] || d.categorie) + '</td><td>' + esc(d.libelle) + (d.beneficiaire ? '<br><small>' + esc(d.beneficiaire) + '</small>' : '') + '</td><td>' + esc(fcfa(d.montant)) + '</td><td>' + (d.annule ? '<small>Annulée</small>' : '<a href="#" data-annuler="' + d.id + '">Annuler</a>') + '</td></tr>'));
+    if (!vus.length) ligneVide(corps, 5, liste.length ? 'Aucune dépense ne correspond.' : 'Aucune dépense enregistrée.');
+  }
+  async function recharger() { liste = await rpcAuth('depenses_liste', { p_annee: annee }); rendre(); }
+  rendre();
+  ['dep-f-cat', 'dep-f-mois'].forEach((id) => $(id).addEventListener('change', rendre));
+  $('btn-dep').addEventListener('click', function () {
+    const montant = parseInt($('dep-montant').value, 10), lib = $('dep-lib').value.trim();
+    if (!lib) { alert('Écris une description.'); return; }
+    if (!montant || montant < 1) { alert('Mets le montant.'); return; }
+    agir(async function () {
+      await rpcAuth('enregistrer_depense', { p_date: $('dep-date').value, p_categorie: $('dep-cat').value, p_libelle: lib, p_beneficiaire: $('dep-ben').value.trim() || null, p_montant: montant });
+      $('dep-lib').value = ''; $('dep-ben').value = ''; $('dep-montant').value = '';
+      await recharger();
+    });
+  });
+  corps.addEventListener('click', function (ev) {
+    const a = ev.target.closest('a[data-annuler]');
+    if (!a) return;
+    ev.preventDefault();
+    if (!confirm('Annuler cette dépense ? Elle restera visible dans la liste, barrée.')) return;
+    agir(async function () { await rpcAuth('annuler_depense', { p_id: Number(a.getAttribute('data-annuler')) }); await recharger(); });
+  });
+}
+
+// ---------- bilan.html : bilan financier de l'année ----------
+async function pageBilanSb() {
+  const main = $('page-bilan');
+  if (!main) return;
+  const titre = '<h1>Bilan financier - ' + esc(CTX.ecole.nom) + '</h1>';
+  const courante = anneeScolaireCourante();
+  const y0 = parseInt(courante.slice(0, 4), 10);
+  const annees = [y0, y0 - 1, y0 - 2].map((y) => y + '-' + (y + 1));
+  let annee = courante;
+  async function afficher() {
+    let b;
+    try { b = await rpcAuth('bilan_financier', { p_annee: annee }); } catch (err) { afficherErreurFinance(main, titre, err); return; }
+    const taux = b.attendu_scolarites > 0 ? Math.round(100 * b.scolarites_encaissees / b.attendu_scolarites) : 0;
+    const couleur = b.solde < 0 ? '#c0392b' : '#1e8449';
+    main.innerHTML = titre + '<div class="no-print card" style="padding:16px;"><label>Année scolaire</label><select id="bilan-annee">' + annees.map((a) => '<option' + (a === annee ? ' selected' : '') + '>' + a + '</option>').join('') + '</select>' +
+      '<button type="button" id="btn-imprimer" style="margin-top:8px;">🖨️ Imprimer / Enregistrer en PDF</button></div>' +
+      '<p>Année scolaire ' + esc(b.annee) + ' (de septembre à août). Les entrées comptent l\'argent réellement reçu ; les sorties sont les dépenses notées.</p>' +
+      '<div class="chiffres"><div class="chiffre"><p>Entrées</p><h2>' + esc(fcfa(b.entrees)) + '</h2></div><div class="chiffre"><p>Sorties</p><h2>' + esc(fcfa(b.sorties)) + '</h2></div><div class="chiffre"><p>Solde</p><h2 style="color:' + couleur + ';">' + esc(fcfa(b.solde)) + '</h2></div></div>' +
+      '<div class="card"><p style="text-align:left;"><b>Scolarités :</b> ' + esc(fcfa(b.scolarites_encaissees)) + ' encaissées sur ' + esc(fcfa(b.attendu_scolarites)) + ' attendues sur l\'année (<b>' + taux + ' %</b>).</p></div>' +
+      '<h2>Mois par mois</h2><table><thead><tr><th>MOIS</th><th>SCOLARITÉS</th><th>INSCRIPTIONS</th><th>DÉPENSES</th><th>SOLDE</th></tr></thead><tbody>' +
+      b.mois.map((m) => { const solde = m.scolarites + m.inscriptions - m.depenses; return '<tr><td>' + esc(moisFr(m.mois)) + '</td><td>' + esc(fcfa(m.scolarites)) + '</td><td>' + esc(fcfa(m.inscriptions)) + '</td><td>' + esc(fcfa(m.depenses)) + (m.salaires ? '<br><small>dont salaires : ' + esc(fcfa(m.salaires)) + '</small>' : '') + '</td><td style="color:' + (solde < 0 ? '#c0392b' : '#1e8449') + ';">' + esc(fcfa(solde)) + '</td></tr>'; }).join('') +
+      '<tr><td><b>TOTAL</b></td><td><b>' + esc(fcfa(b.scolarites_encaissees)) + '</b></td><td><b>' + esc(fcfa(b.entrees - b.scolarites_encaissees)) + '</b></td><td><b>' + esc(fcfa(b.sorties)) + '</b></td><td style="color:' + couleur + ';"><b>' + esc(fcfa(b.solde)) + '</b></td></tr></tbody></table>' +
+      '<h2>Dépenses par catégorie</h2>' + (b.categories.length ? '<table><thead><tr><th>CATÉGORIE</th><th>TOTAL</th></tr></thead><tbody>' + b.categories.map((c) => '<tr><td>' + esc(CATEGORIES_DEPENSES[c.categorie] || c.categorie) + '</td><td>' + esc(fcfa(c.total)) + '</td></tr>').join('') + '</tbody></table>' : '<p>Aucune dépense enregistrée.</p>');
+    $('bilan-annee').addEventListener('change', function () { annee = this.value; agir(afficher); });
+    $('btn-imprimer').addEventListener('click', function () { window.print(); });
+  }
+  await afficher();
+}
+
+// ---------- recu-scolarite.html : reçu de paiement à imprimer (école ou parent) ----------
+async function pageRecuScolarite() {
+  const zone = $('page-recu-scolarite');
+  if (!zone) return;
+  const id = Number(new URLSearchParams(window.location.search).get('id'));
+  const lien = (window.location.hash || '').replace('#', '').trim();
+  let r;
+  try { r = /^[0-9a-f]{64}$/.test(lien) ? await rpc('recu_scolarite_parent', { p_lien: lien, p_id: id }) : await rpcAuth('recu_scolarite', { p_id: id }); }
+  catch (e) { zone.innerHTML = '<p>' + esc(e && e.session ? 'Connecte-toi à ton espace pour voir ce reçu.' : messageErreur(e)) + '</p>' + (e && e.session ? '<a href="directeur.html">Se connecter</a>' : ''); return; }
+  const reste = Math.max(r.mensualite - r.total_mois, 0);
+  zone.innerHTML = '<div class="recu-feuille"><h1 style="margin:0;">' + esc(r.ecole) + '</h1><p style="margin:0 0 12px;">' + esc(r.ville || '') + '</p>' +
+    '<h2 style="text-align:center;border-top:2px solid #333;border-bottom:2px solid #333;padding:8px 0;">REÇU DE PAIEMENT</h2>' +
+    '<p style="text-align:right;"><b>N° ' + esc(r.numero) + '</b><br>Date : ' + esc(jourFr(r.date_paiement)) + '</p>' +
+    (r.annule ? '<p style="color:#c0392b;"><b>⚠️ Ce paiement a été annulé.</b></p>' : '') +
+    '<table><tbody><tr><td>Élève</td><td><b>' + esc(r.eleve) + '</b></td></tr><tr><td>Classe</td><td>' + esc(r.classe) + '</td></tr><tr><td>Année scolaire</td><td>' + esc(r.annee) + '</td></tr>' +
+    '<tr><td>Parent</td><td>' + esc(r.parent_nom || '') + '</td></tr><tr><td>Objet</td><td>Scolarité de ' + esc(moisFr(r.mois)) + '</td></tr>' +
+    '<tr><td>Moyen de paiement</td><td>' + esc(NOMS_METHODES[r.methode] || r.methode) + '</td></tr><tr><td>Montant reçu</td><td><b style="font-size:1.4em;">' + esc(fcfa(r.montant)) + '</b></td></tr>' +
+    '<tr><td>Scolarité du mois</td><td>' + esc(fcfa(r.mensualite)) + ' (total payé : ' + esc(fcfa(r.total_mois)) + ', reste : ' + esc(fcfa(reste)) + ')</td></tr></tbody></table>' +
+    '<p style="margin-top:36px;">Cachet et signature de l\'école :</p><div style="height:70px;"></div><p><small>Document généré par InscriGab.</small></p></div>' +
+    '<div class="no-print"><button type="button" class="vert" id="btn-imprimer-recu">🖨️ Imprimer / Enregistrer en PDF</button></div>';
+  $('btn-imprimer-recu').addEventListener('click', function () { window.print(); });
+}
+
 // ---------- payer-scolarite.html : le parent paie la scolarité de ses enfants ----------
 async function pagePayerScolarite() {
   const zone = $('page-payer-scolarite');
@@ -506,12 +627,13 @@ async function pagePayerScolarite() {
         const ok = payables.includes(m);
         return '<tr><td>' + (ok ? '<input type="checkbox" class="case-mois" value="' + esc(m.mois) + '" data-reste="' + m.reste + '">' : '') + '</td><td>' + esc(moisFr(m.mois)) + '</td><td>' + esc(fcfa(m.reste)) + '</td><td>' + (ETAT[m.statut] || '') + (m.statut === 'en_attente' ? '<br><a href="#" data-annuler="' + esc(m.mois) + '">Annuler</a>' : '') + '</td></tr>';
       }).join('') + '</tbody></table>';
-    if (!payables.length) html += '<p>✅ Rien à payer pour le moment.</p></fieldset><br>';
+    const recusHtml = c.recus && c.recus.length ? '<p><b>🧾 Mes reçus</b></p><ul>' + c.recus.map((r) => '<li><a href="recu-scolarite.html?id=' + r.id + '#' + esc(parent.lien) + '" target="_blank" rel="noopener">' + esc(moisFr(r.mois)) + ' - ' + esc(fcfa(r.montant)) + '</a> <small>(' + esc(r.numero) + ')</small></li>').join('') + '</ul>' : '';
+    if (!payables.length) html += '<p>✅ Rien à payer pour le moment.</p>' + recusHtml + '</fieldset><br>';
     else if (!moyens.length) html += '<p>⚠️ Cette école n\'a pas encore renseigné de numéro Mobile Money. Contacte-la.</p></fieldset><br>';
     else {
       html += '<p><b>Coche les mois à payer</b>, puis choisis ton moyen de paiement :</p>' +
         moyens.map(function (k, j) { return '<label><input type="radio" name="moyen-' + idx + '" value="' + k + '"' + (j === 0 ? ' checked' : '') + '> ' + NOM_MOYEN[k] + '</label><br>'; }).join('') +
-        '<br><button type="button" class="btn-continuer">Continuer</button><div class="zone-instructions"></div></fieldset><br>';
+        '<br><button type="button" class="btn-continuer">Continuer</button><div class="zone-instructions"></div>' + recusHtml + '</fieldset><br>';
     }
     liste.insertAdjacentHTML('beforeend', html);
   });
@@ -606,6 +728,11 @@ Object.assign(MESSAGES_ERREUR, {
   note_trop_longue: 'La note est trop longue (200 caractères maximum).',
   declaration_deja_en_attente: "Une déclaration de paiement est déjà en attente pour ce mois.",
   declarations_en_attente: "Des parents ont déclaré des paiements à traiter. Confirme-les ou refuse-les dans la page Scolarités avant de désactiver ce module.",
+  categorie_invalide: "Catégorie invalide.",
+  libelle_invalide: "Écris une description (120 caractères maximum).",
+  beneficiaire_invalide: "Le nom est trop long.",
+  date_invalide: "Cette date n'est pas valable.",
+  depense_introuvable: "Dépense introuvable ou déjà annulée.",
   mois_deja_paye: "Ce mois est déjà payé.",
   declaration_introuvable: "Déclaration introuvable ou déjà traitée.",
   mois_invalide: "Choisis au moins un mois à payer.",
@@ -915,7 +1042,7 @@ function pageDirecteurAuth() {
 let CTX = null;
 const peut = (p) => !!(CTX && CTX.permissions && CTX.permissions.includes(p));
 async function initDirecteur() {
-  const ids = ['dashboard-ecole', 'page-eleves', 'page-dossiers', 'page-paiements', 'page-classes', 'page-scolarite', 'page-parametres', 'page-fiche-eleve', 'page-mon-abonnement'];
+  const ids = ['dashboard-ecole', 'page-eleves', 'page-dossiers', 'page-paiements', 'page-classes', 'page-scolarite', 'page-depenses', 'page-bilan', 'page-parametres', 'page-fiche-eleve', 'page-mon-abonnement'];
   if (!ids.some((id) => $(id))) return;
   try { CTX = await rpcAuth('ma_session'); }
   catch (e) {
@@ -937,7 +1064,7 @@ async function initDirecteur() {
   if (h1 && h1.textContent.includes('Lycée Léon Mba')) h1.textContent = h1.textContent.replace('Lycée Léon Mba', CTX.ecole.nom);
   const btnDeco = $('btn-deconnexion');
   if (btnDeco) btnDeco.addEventListener('click', function () { deconnecter('directeur.html'); });
-  const f = { dashboard: pageDashboardSb, eleves: pageElevesSb, dossiers: pageDossiersSb, paiements: pagePaiementsSb, classes: pageClassesSb, scolarite: pageScolariteSb, parametres: pageParametresSb, fiche: pageFicheSb, abonnement: pageMonAbonnement };
+  const f = { dashboard: pageDashboardSb, eleves: pageElevesSb, dossiers: pageDossiersSb, paiements: pagePaiementsSb, classes: pageClassesSb, scolarite: pageScolariteSb, depenses: pageDepensesSb, bilan: pageBilanSb, parametres: pageParametresSb, fiche: pageFicheSb, abonnement: pageMonAbonnement };
   for (const k in f) { try { await f[k](); } catch (e) { if (e && e.session) { window.location.href = 'directeur.html'; return; } console.error(e); } }
 }
 async function chargerDossiers() { return await rpcAuth('dossiers_ecole'); }
@@ -1314,7 +1441,7 @@ async function pageScolariteSb() {
         '<label>Note (facultatif)</label><input type="text" id="pay-note" maxlength="200" placeholder="Ex : payé par la maman">' +
         '<button class="vert" id="btn-pay" style="margin-top:10px;">Enregistrer le paiement</button></div>' : '') +
       '<div class="card"><h2 style="text-align:left;">Paiements enregistrés</h2>' +
-      (d.paiements.length ? '<table><thead><tr><th>DATE</th><th>MOIS</th><th>MONTANT</th><th>MOYEN</th><th></th></tr></thead><tbody>' + d.paiements.map((p) => '<tr' + (p.annule ? ' style="opacity:.5;text-decoration:line-through;"' : '') + '><td>' + esc(new Date(p.date_paiement + 'T00:00:00').toLocaleDateString('fr-FR')) + '</td><td>' + esc(moisFr(p.mois)) + '</td><td>' + esc(fcfa(p.montant)) + '</td><td>' + esc(NOMS_METHODES[p.methode] || p.methode) + (p.note ? '<br><small>' + esc(p.note) + '</small>' : '') + '</td><td>' + (p.annule ? '<small>Annulé</small>' : '<a href="#" data-annuler="' + p.id + '">Annuler</a>') + '</td></tr>').join('') + '</tbody></table>' : '<p>Aucun paiement pour le moment.</p>') + '</div>';
+      (d.paiements.length ? '<table><thead><tr><th>DATE</th><th>MOIS</th><th>MONTANT</th><th>MOYEN</th><th></th></tr></thead><tbody>' + d.paiements.map((p) => '<tr' + (p.annule ? ' style="opacity:.5;text-decoration:line-through;"' : '') + '><td>' + esc(new Date(p.date_paiement + 'T00:00:00').toLocaleDateString('fr-FR')) + '</td><td>' + esc(moisFr(p.mois)) + '</td><td>' + esc(fcfa(p.montant)) + '</td><td>' + esc(NOMS_METHODES[p.methode] || p.methode) + (p.note ? '<br><small>' + esc(p.note) + '</small>' : '') + '</td><td>' + (p.annule ? '<small>Annulé</small>' : '<a href="recu-scolarite.html?id=' + p.id + '" target="_blank" rel="noopener">🧾 Reçu</a><br><a href="#" data-annuler="' + p.id + '">Annuler</a>') + '</td></tr>').join('') + '</tbody></table>' : '<p>Aucun paiement pour le moment.</p>') + '</div>';
     zone.scrollIntoView({ behavior: 'smooth' });
     const sel = $('pay-mois'), mont = $('pay-montant');
     if (sel && mont) { const maj = () => { mont.value = sel.options[sel.selectedIndex].getAttribute('data-reste'); }; sel.addEventListener('change', maj); maj(); }
