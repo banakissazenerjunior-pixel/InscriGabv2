@@ -1319,15 +1319,21 @@ async function pageScolariteSb() {
   const main = $('page-scolarite');
   if (!main) return;
   const titre = '<h1>Scolarités - ' + esc(CTX.ecole.nom) + '</h1>';
-  // Année scolaire : de septembre à juin
+  // Année scolaire : de septembre à juin. L'école peut avoir des élèves de plusieurs années.
   const auj = new Date();
-  const debutAnnee = auj.getMonth() >= 8 ? auj.getFullYear() : auj.getFullYear() - 1;
-  const listeMois = [];
-  for (let i = 0; i < 10; i++) { const d = new Date(debutAnnee, 8 + i, 1); listeMois.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-01'); }
+  const moisDeAnnee = (annee) => { const y0 = parseInt(String(annee).slice(0, 4), 10); const r = []; for (let i = 0; i < 10; i++) { const d = new Date(y0, 8 + i, 1); r.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-01'); } return r; };
   const courant = auj.getFullYear() + '-' + String(auj.getMonth() + 1).padStart(2, '0') + '-01';
-  let moisChoisi = listeMois.includes(courant) ? courant : (courant > listeMois[9] ? listeMois[9] : listeMois[0]);
-  let liste;
-  try { liste = await rpcAuth('scolarite_mois', { p_mois: moisChoisi }); }
+  const moisInitial = (annee) => { const l = moisDeAnnee(annee); return l.includes(courant) ? courant : (courant > l[9] ? l[9] : l[0]); };
+  const courante = anneeScolaireCourante();
+  let toutes, anneeChoisie, listeMois, moisChoisi;
+  try {
+    toutes = await rpcAuth('scolarite_mois', { p_mois: courant });
+    const anneesEleves = toutes.map((e) => e.annee).sort().reverse();
+    anneeChoisie = toutes.some((e) => e.annee === courante) ? courante : (anneesEleves[0] || courante);
+    listeMois = moisDeAnnee(anneeChoisie);
+    moisChoisi = moisInitial(anneeChoisie);
+    if (moisChoisi !== courant) toutes = await rpcAuth('scolarite_mois', { p_mois: moisChoisi });
+  }
   catch (err) {
     if (err.session) throw err;
     const msg = String(err && err.message || '').includes('module_non_active')
@@ -1335,11 +1341,16 @@ async function pageScolariteSb() {
       : '<p>' + esc(messageErreur(err)) + '</p>';
     main.innerHTML = titre + msg; return;
   }
-  const classes = Array.from(new Set(liste.map((e) => e.classe))).sort();
+  const annees = Array.from(new Set(toutes.map((e) => e.annee).concat([courante]))).sort().reverse();
+  let liste = toutes.filter((e) => e.annee === anneeChoisie);
+  let classes = Array.from(new Set(liste.map((e) => e.classe))).sort();
+  const optionsMois = () => listeMois.map((m) => '<option value="' + m + '"' + (m === moisChoisi ? ' selected' : '') + '>' + esc(moisFr(m)) + '</option>').join('');
+  const optionsClasses = () => '<option value="">Toutes les classes</option>' + classes.map((c) => '<option>' + esc(c) + '</option>').join('');
   main.innerHTML = titre + '<p>Choisis un mois pour voir qui a payé et qui doit encore, classe par classe. Mensualités de septembre à juin.</p>' +
     '<div id="zone-declarations"></div>' +
-    '<div class="card" style="padding:16px;"><label>Mois</label><select id="filtre-mois">' + listeMois.map((m) => '<option value="' + m + '"' + (m === moisChoisi ? ' selected' : '') + '>' + esc(moisFr(m)) + '</option>').join('') + '</select>' +
-    '<label>Classe</label><select id="filtre-classe"><option value="">Toutes les classes</option>' + classes.map((c) => '<option>' + esc(c) + '</option>').join('') + '</select>' +
+    '<div class="card" style="padding:16px;"><label>Année scolaire</label><select id="filtre-annee">' + annees.map((a) => '<option' + (a === anneeChoisie ? ' selected' : '') + '>' + esc(a) + '</option>').join('') + '</select>' +
+    '<label>Mois</label><select id="filtre-mois">' + optionsMois() + '</select>' +
+    '<label>Classe</label><select id="filtre-classe">' + optionsClasses() + '</select>' +
     '<label>Statut</label><select id="filtre-statut"><option value="">Tous</option><option value="a_relancer">À relancer (impayé ou partiel)</option><option value="solde">Payé</option><option value="a_venir">À venir</option></select>' +
     '<input type="text" id="filtre-nom" placeholder="🔍 Rechercher un élève..."></div>' +
     '<div id="zone-chiffres"></div>' +
@@ -1384,7 +1395,15 @@ async function pageScolariteSb() {
     });
     if (!vus.length) ligneVide(corpsEleves, 6, liste.length ? 'Aucun élève ne correspond.' : 'Aucun élève validé pour le moment.');
   }
-  async function recharger() { liste = await rpcAuth('scolarite_mois', { p_mois: moisChoisi }); rendre(); }
+  async function recharger() {
+    toutes = await rpcAuth('scolarite_mois', { p_mois: moisChoisi });
+    liste = toutes.filter((e) => e.annee === anneeChoisie);
+    classes = Array.from(new Set(liste.map((e) => e.classe))).sort();
+    const fc = $('filtre-classe').value;
+    $('filtre-classe').innerHTML = optionsClasses();
+    $('filtre-classe').value = classes.includes(fc) ? fc : '';
+    rendre();
+  }
   rendre();
 
   // Paiements que les parents disent avoir faits : l'école confirme la réception ou refuse
@@ -1407,6 +1426,11 @@ async function pageScolariteSb() {
   });
   await chargerDeclarations();
 
+  $('filtre-annee').addEventListener('change', function () {
+    anneeChoisie = this.value; listeMois = moisDeAnnee(anneeChoisie); moisChoisi = moisInitial(anneeChoisie);
+    $('filtre-mois').innerHTML = optionsMois();
+    agir(recharger);
+  });
   $('filtre-mois').addEventListener('change', function () { moisChoisi = this.value; agir(recharger); });
   ['filtre-classe', 'filtre-statut'].forEach((id) => $(id).addEventListener('change', rendre));
   $('filtre-nom').addEventListener('input', rendre);
